@@ -7,6 +7,7 @@
 
 using namespace std;
 
+
 struct atributos
 {
 	string label;
@@ -15,7 +16,7 @@ struct atributos
 
 int yylex(void);
 void yyerror(string);
-char* gerar_nomes_var();
+string gerar_nomes_var();
 %}
 
 %token TK_NUM
@@ -49,12 +50,12 @@ COMANDO 	: E ';'
 
 E 			: E '+' E
 			{
-				char *nome = gerar_nomes_var();
+				string nome = gerar_nomes_var();
 				$$.traducao = $1.traducao + $3.traducao + "\t" + nome + " = b + c;\n";
 			}
 			| TK_NUM
 			{
-				$$.traducao = "\t a = " + $1.traducao + ";\n";
+				$$.traducao = "\ta = " + $1.traducao + ";\n";
 			}
 			| TK_ID
 			;
@@ -78,9 +79,11 @@ void yyerror( string MSG )
 	exit (0);
 }		
 
-char* gerar_nomes_var(){
-	char *nome;
-	nome = "DAS";
+string gerar_nomes_var(){
+	static int num_para_gerar_nomes = 0;
+	string nome;
+	nome = "temp_" + to_string(num_para_gerar_nomes);
 
+	num_para_gerar_nomes++;
 	return nome;
 }		

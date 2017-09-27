@@ -96,6 +96,7 @@
 
 using namespace std;
 
+
 struct atributos
 {
 	string label;
@@ -104,7 +105,7 @@ struct atributos
 
 int yylex(void);
 void yyerror(string);
-char* gerar_nomes_var();
+string gerar_nomes_var();
 
 
 /* Enabling traces.  */
@@ -138,7 +139,7 @@ typedef int YYSTYPE;
 
 
 /* Line 216 of yacc.c.  */
-#line 142 "y.tab.c"
+#line 143 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -422,7 +423,7 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    31,    31,    37,    43,    44,    47,    50,    55,    59
+       0,    32,    32,    38,    44,    45,    48,    51,    56,    60
 };
 #endif
 
@@ -1326,37 +1327,37 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 32 "sintatica.y"
+#line 33 "sintatica.y"
     {
 				cout << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main(void)\n{\n" << (yyvsp[(5) - (5)]).traducao << "\treturn 0;\n}" << endl; 
 			}
     break;
 
   case 3:
-#line 38 "sintatica.y"
+#line 39 "sintatica.y"
     {
 				(yyval).traducao = (yyvsp[(2) - (3)]).traducao;
 			}
     break;
 
   case 7:
-#line 51 "sintatica.y"
+#line 52 "sintatica.y"
     {
-				char *nome = gerar_nomes_var();
+				string nome = gerar_nomes_var();
 				(yyval).traducao = (yyvsp[(1) - (3)]).traducao + (yyvsp[(3) - (3)]).traducao + "\t" + nome + " = b + c;\n";
 			}
     break;
 
   case 8:
-#line 56 "sintatica.y"
+#line 57 "sintatica.y"
     {
-				(yyval).traducao = "\t a = " + (yyvsp[(1) - (1)]).traducao + ";\n";
+				(yyval).traducao = "\ta = " + (yyvsp[(1) - (1)]).traducao + ";\n";
 			}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1360 "y.tab.c"
+#line 1361 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1570,7 +1571,7 @@ yyreturn:
 }
 
 
-#line 62 "sintatica.y"
+#line 63 "sintatica.y"
 
 
 #include "lex.yy.c"
@@ -1590,10 +1591,12 @@ void yyerror( string MSG )
 	exit (0);
 }		
 
-char* gerar_nomes_var(){
-	char *nome;
-	nome = "DAS";
+string gerar_nomes_var(){
+	static int num_para_gerar_nomes = 0;
+	string nome;
+	nome = "temp_" + to_string(num_para_gerar_nomes);
 
+	num_para_gerar_nomes++;
 	return nome;
 }		
 
