@@ -423,7 +423,7 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    32,    32,    38,    44,    45,    48,    51,    56,    60
+       0,    32,    32,    38,    44,    45,    48,    51,    57,    63
 };
 #endif
 
@@ -1344,20 +1344,23 @@ yyreduce:
 #line 52 "sintatica.y"
     {
 				string nome = gerar_nomes_var();
-				(yyval).traducao = (yyvsp[(1) - (3)]).traducao + (yyvsp[(3) - (3)]).traducao + "\t" + nome + " = b + c;\n";
+				(yyval).traducao = (yyvsp[(1) - (3)]).traducao + (yyvsp[(3) - (3)]).traducao + "\t" + nome + " = " + (yyvsp[(1) - (3)]).label + " + " + (yyvsp[(3) - (3)]).label + ";\n";
+				(yyval).label = nome;
 			}
     break;
 
   case 8:
-#line 57 "sintatica.y"
+#line 58 "sintatica.y"
     {
-				(yyval).traducao = "\ta = " + (yyvsp[(1) - (1)]).traducao + ";\n";
+				string nome = gerar_nomes_var();
+				(yyval).traducao = "\t" + nome + " = " + (yyvsp[(1) - (1)]).traducao + ";\n";
+				(yyval).label = nome;
 			}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1361 "y.tab.c"
+#line 1364 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1571,7 +1574,7 @@ yyreturn:
 }
 
 
-#line 63 "sintatica.y"
+#line 66 "sintatica.y"
 
 
 #include "lex.yy.c"

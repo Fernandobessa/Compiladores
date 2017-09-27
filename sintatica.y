@@ -51,11 +51,14 @@ COMANDO 	: E ';'
 E 			: E '+' E
 			{
 				string nome = gerar_nomes_var();
-				$$.traducao = $1.traducao + $3.traducao + "\t" + nome + " = b + c;\n";
+				$$.traducao = $1.traducao + $3.traducao + "\t" + nome + " = " + $1.label + " + " + $3.label + ";\n";
+				$$.label = nome;
 			}
 			| TK_NUM
 			{
-				$$.traducao = "\ta = " + $1.traducao + ";\n";
+				string nome = gerar_nomes_var();
+				$$.traducao = "\t" + nome + " = " + $1.traducao + ";\n";
+				$$.label = nome;
 			}
 			| TK_ID
 			;
