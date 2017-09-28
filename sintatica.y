@@ -12,6 +12,7 @@ struct atributos
 {
 	string label;
 	string traducao;
+	string tipo;
 };
 
 int yylex(void);
@@ -52,6 +53,12 @@ E 			: E '+' E
 			{
 				string nome = gerar_nomes_var();
 				$$.traducao = $1.traducao + $3.traducao + "\t" + nome + " = " + $1.label + " + " + $3.label + ";\n";
+				$$.label = nome;		
+			}
+			| E '*' E
+			{
+				string nome = gerar_nomes_var();
+				$$.traducao = $1.traducao + $3.traducao + "\t" + nome + " = " + $1.label + " * " + $3.label + ";\n";
 				$$.label = nome;
 			}
 			| TK_NUM
@@ -61,6 +68,11 @@ E 			: E '+' E
 				$$.label = nome;
 			}
 			| TK_ID
+			{
+				string nome = gerar_nomes_var();
+				$$.traducao = "\t" + nome + " = " + $1.label + ";\n";
+				$$.label = nome;
+			}
 			;
 
 %%
@@ -89,4 +101,6 @@ string gerar_nomes_var(){
 
 	num_para_gerar_nomes++;
 	return nome;
-}		
+}
+
+
