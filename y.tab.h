@@ -41,29 +41,33 @@
    enum yytokentype {
      TK_NUM = 258,
      TK_REAL = 259,
-     TK_MAIN = 260,
-     TK_ID = 261,
-     TK_TIPO_INT = 262,
-     TK_TIPO_FLOAT = 263,
-     TK_TIPO_CHAR = 264,
-     TK_TIPO_BOOL = 265,
-     TK_TIPO_STRING = 266,
-     TK_FIM = 267,
-     TK_ERROR = 268
+     TK_STRING = 260,
+     TK_MAIN = 261,
+     TK_ID = 262,
+     TK_TIPO_VAR = 263,
+     TK_TIPO_INT = 264,
+     TK_TIPO_FLOAT = 265,
+     TK_TIPO_CHAR = 266,
+     TK_TIPO_BOOL = 267,
+     TK_TIPO_STRING = 268,
+     TK_FIM = 269,
+     TK_ERROR = 270
    };
 #endif
 /* Tokens.  */
 #define TK_NUM 258
 #define TK_REAL 259
-#define TK_MAIN 260
-#define TK_ID 261
-#define TK_TIPO_INT 262
-#define TK_TIPO_FLOAT 263
-#define TK_TIPO_CHAR 264
-#define TK_TIPO_BOOL 265
-#define TK_TIPO_STRING 266
-#define TK_FIM 267
-#define TK_ERROR 268
+#define TK_STRING 260
+#define TK_MAIN 261
+#define TK_ID 262
+#define TK_TIPO_VAR 263
+#define TK_TIPO_INT 264
+#define TK_TIPO_FLOAT 265
+#define TK_TIPO_CHAR 266
+#define TK_TIPO_BOOL 267
+#define TK_TIPO_STRING 268
+#define TK_FIM 269
+#define TK_ERROR 270
 
 
 

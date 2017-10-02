@@ -14,6 +14,9 @@ typedef struct variavel
 	string var_name;
 	string temp_name;
 
+	// usando pra fazer o cast de steing to char*
+	int tamanho;
+
 } variavel;
 
 // tabela de variaveis
@@ -47,12 +50,13 @@ Var_table popEsc(maps *tack)
 	return esc;
 }
 
-variavel criarVar(string nome, string temp_nome, string tipo){
+variavel criarVar(string nome, string temp_nome, string tipo, int tamanho){
 	
 	variavel var;
 	var.tipo = tipo;
 	var.var_name = nome;
 	var.temp_name = temp_nome;
+	var.tamanho = tamanho;
 
 	return var;
 }
@@ -78,4 +82,65 @@ void addVarEsc(maps *tack, variavel var){
 void addVarEscGlobal(maps *tack, variavel var){
 
 	tack->v[0][var.var_name] = var;
+}
+
+typedef std::vector<variavel> varsDeclaradas;
+
+string getDeclaradas(varsDeclaradas vars){
+	
+	string line = "";
+	string line_int = "int";
+	string line_float = "float";
+	string line_char = "char";
+	string line_bool = "bool";
+	string line_string = "";
+
+	for (int i = 0; i < vars.size(); ++i)
+	{
+		variavel v = vars[i];
+
+		if (v.tipo == "string")
+		{
+			line += "char* " + v.temp_name + " = (char*) malloc(sizeof(char) * " + to_string(v.tamanho) + " ); \n";
+		}
+		else if(v.tipo == "int"){
+		
+			line_int += " " + v.temp_name + ",";
+
+		}
+		else if(v.tipo == "float"){
+		
+			line_float += " " + v.temp_name + ",";
+
+		}
+		else if(v.tipo == "char"){
+		
+			line_char += " " + v.temp_name + ",";
+
+		}
+		else if(v.tipo == "bool"){
+		
+			line_bool += " " + v.temp_name + ",";
+
+		}
+
+	}
+
+	line_int.pop_back();
+	line_float.pop_back();
+	line_char.pop_back();
+	line_bool.pop_back();
+
+	line_int += ";\n";
+	line_float += ";\n";
+	line_char += ";\n";
+	line_bool += ";\n";
+
+
+	line += line_int;
+	line += line_float;
+	line += line_char;
+	line += line_bool;
+
+	return line;
 }

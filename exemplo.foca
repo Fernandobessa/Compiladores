@@ -1,5 +1,11 @@
 int main()
 {
 
-	int aa;
+	var aa = 5;
+	int aaa = 5;
+	float bb;
+	char c, d, e;
+	bool f, g;
+	string h, i;
+
 }

@@ -20,10 +20,13 @@ struct atributos
 string error_msg = "Wubba Lubba Dub Dub";
 
 maps* tack = criarMaps();
+varsDeclaradas varsDec;
 
 // Functions
 int yylex(void);
 void yyerror(string);
+string declararVars();
+variavel criadorDeVariavel(string, string, string, int);
 string gerar_nomes_var();
 string get_var_tipo(int);
 atributos arith_com_cast(int, string, int, string, string);
@@ -31,21 +34,21 @@ int typeOfArith(int, int);
 atributos arith(atributos, atributos, string);
 %}
 
-%token TK_NUM TK_REAL
-%token TK_MAIN TK_ID TK_TIPO_INT TK_TIPO_FLOAT TK_TIPO_CHAR TK_TIPO_BOOL TK_TIPO_STRING
+%token TK_NUM TK_REAL TK_STRING
+%token TK_MAIN TK_ID TK_TIPO_VAR TK_TIPO_INT TK_TIPO_FLOAT TK_TIPO_CHAR TK_TIPO_BOOL TK_TIPO_STRING
 %token TK_FIM TK_ERROR
 
 // ordem das operacoes?! bottom -> up	
 %start S
 %left '+' '-'
 %left '*' '/'
-
+%right '='
 
 %%
 
 S 			: TK_TIPO_INT TK_MAIN '(' ')' BLOCO
 			{
-				cout << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main(void)\n{\n" << $5.traducao << "\treturn 0;\n}" << endl; 
+				cout << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\n" << declararVars() << "\nint main(void)\n{\n" << $5.traducao << "\treturn 0;\n}" << endl; 
 			}
 			;
 
@@ -64,6 +67,10 @@ COMANDO 	: E ';'
 			{
 				$$ = $1;
 			}
+			// | ATRIB
+			// {
+			// 	$$ = $1;
+			// }
 			;
 
 DECLARATION	: TIPO VARLIST
@@ -98,20 +105,82 @@ TIPO 		: TK_TIPO_INT
 				$$.tipo = TK_TIPO_STRING;
 				$$.traducao = $1.traducao;
 			}
+			// isso seria pra declarar variavel sem o tipo antes do nome da mesma [to-do], rever isso
+			| TK_TIPO_VAR
+			{
+				$$.traducao = $1.traducao;
+			}
 			;
 
-VARLIST 	: TK_ID
+VARLIST 	: VARLIST ',' TK_ID
 			{
+				cout << "VARLIST, TK_ID _______" <<endl;
+
+				string nome = gerar_nomes_var();
+				$$.traducao = $1.traducao + $3.traducao;
+
+				variavel v = criadorDeVariavel($3.label, nome, get_var_tipo($0.tipo), 0);
+				// addVarEsc(tack, v);
+
+				cout << " ->>>> " << tack->v[0][$3.label].var_name << endl;
+				cout << " ->>>> " << tack->v[0][$3.label].temp_name << endl;
+				cout << " ->>>> " << tack->v[0][$3.label].tipo << endl;
+
+			}
+			| TK_ID '=' E	
+			{	
+				cout << "TK_ID = E_______" <<endl;
+				string nome = gerar_nomes_var();
+				// inferir tipo
+				string tipo_v = "";
+
+				// se o tipo foi dito -> int x = 9
+				if (get_var_tipo($0.tipo) != "")
+				{	
+					// cout << "1" << endl;
+					tipo_v = get_var_tipo($0.tipo);
+				}
+				else // se tipo nao foi dito -> x = 9
+				{
+					// cout << "2" << endl;
+					// cout << $3.tipo << endl;
+
+					tipo_v = get_var_tipo($3.tipo);
+				}
+
+				variavel v = criadorDeVariavel($1.label, nome, tipo_v, 0);
+
+				// addVarEsc(tack, v);
+
+				cout << " ->>>> " << tack->v[0][$1.label].var_name << endl;
+				cout << " ->>>> " << tack->v[0][$1.label].temp_name << endl;
+				cout << " ->>>> " << tack->v[0][$1.label].tipo << endl;
+					 
+			}
+			| TK_ID
+			{
+				cout << "TK_ID _______" <<endl;
+
 				// tipo nome_var;
 				$$.traducao = $1.traducao;
 				$$.label = $1.label;
 
-				variavel v = criarVar($$.label, gerar_nomes_var(), get_var_tipo($0.tipo));
+				variavel v = criadorDeVariavel($$.label, gerar_nomes_var(), get_var_tipo($0.tipo), 0);
 
-				addVarEsc(tack, v);
+				// cout << v.var_name << endl;
 
+				// addVarEsc(tack, v);
+
+				// for (int i = 0; i < tack->v.size(); ++i)
+				// {
+					cout << " ->>>> " << tack->v[0][$$.label].var_name << endl;
+					cout << " ->>>> " << tack->v[0][$$.label].temp_name << endl;
+					cout << " ->>>> " << tack->v[0][$$.label].tipo << endl;
+					 
+				// }
 
 			}
+			;
 
 E 			: '(' E ')'
 			{
@@ -155,6 +224,8 @@ E 			: '(' E ')'
 				$$.traducao = "\t" + nome + " = " + $1.label + ";\n";
 				$$.label = nome;
 
+				variavel v = criadorDeVariavel(nome, nome, get_var_tipo($$.tipo), 0);
+
 			}
 			| TK_REAL
 			{
@@ -163,6 +234,21 @@ E 			: '(' E ')'
 				string nome = gerar_nomes_var();
 				$$.traducao = "\t" + nome + " = " + $1.label + ";\n";
 				$$.label = nome;
+
+				variavel v = criadorDeVariavel(nome, nome, get_var_tipo($$.tipo), 0);
+
+			}
+			| TK_STRING
+			{
+				$$.tipo = TK_TIPO_STRING;
+
+				string nome = gerar_nomes_var();
+				$$.traducao = "\tstrcpy( " + nome + " , " + $1.label + " );\n";
+				$$.label = nome;
+
+				variavel v = criadorDeVariavel(nome, nome, get_var_tipo($$.tipo), $1.label.size() - 2);
+				// [to-do] checar isso $1.label.size() - 2
+
 			}
 			| TK_ID
 			{
@@ -187,7 +273,18 @@ void yyerror( string MSG )
 {
 	cout << MSG << endl;
 	exit (0);
-}		
+}
+
+string declararVars(){
+	return getDeclaradas(varsDec);
+}
+variavel criadorDeVariavel(string nome, string temp_nome, string tipo, int tamanho){
+	variavel v = criarVar(nome, temp_nome, tipo, tamanho);
+	addVarEsc(tack, v);
+	varsDec.push_back(v);
+
+	return v;
+}
 
 string gerar_nomes_var(){
 	static int num_para_gerar_nomes = 0;

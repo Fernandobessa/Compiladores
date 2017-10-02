@@ -12,6 +12,7 @@ NUM (-)?{DIGITO}+
 REAL (-)?{NUM}+("."{NUM}+)?
 CHAR \'({LETRA}|{NUM})\'
 ID {LETRA}({LETRA}|{NUM})*
+STRING	\"[^\"]*\"
 
 %%
 
@@ -20,6 +21,8 @@ ID {LETRA}({LETRA}|{NUM})*
 {DELIM} 	{}
 
 "main"		{return TK_MAIN;}
+
+"var"		{return TK_TIPO_VAR;}
 
 "int"		{return TK_TIPO_INT;}
 
@@ -33,11 +36,12 @@ ID {LETRA}({LETRA}|{NUM})*
 
 [(){}[\];,]	{ return *yytext; }
 
-[+\-*/]		{ return *yytext; }
+[+\-*/=]		{ return *yytext; }
 
 {NUM}		{ yylval.label = yytext; return TK_NUM; }
 {REAL}		{ yylval.label = yytext; return TK_REAL;}
 {ID}		{ yylval.label = yytext; return TK_ID; }
+{STRING}	{ yylval.label = yytext; return TK_STRING; }
 
 .			{ *yytext; }
 
