@@ -458,11 +458,11 @@ static const yytype_int8 yyrhs[] =
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_uint16 yyrline[] =
 {
-       0,    49,    49,    55,    61,    62,    65,    66,    76,    83,
-      88,    93,    98,   103,   109,   115,   130,   160,   185,   189,
-     203,   207,   211,   215,   219,   230,   241,   253
+       0,    49,    49,    55,    61,    65,    68,    69,    81,    91,
+      96,   101,   106,   111,   117,   123,   138,   174,   199,   203,
+     217,   221,   225,   229,   233,   244,   255,   267
 };
 #endif
 
@@ -1404,23 +1404,35 @@ yyreduce:
 			}
     break;
 
-  case 7:
-#line 67 "sintatica.y"
+  case 4:
+#line 62 "sintatica.y"
     {
-				(yyval) = (yyvsp[(1) - (2)]);
-			}
-    break;
-
-  case 8:
-#line 77 "sintatica.y"
-    {
-				(yyvsp[(2) - (2)]).tipo = (yyvsp[(1) - (2)]).tipo;
 				(yyval).traducao = (yyvsp[(1) - (2)]).traducao + (yyvsp[(2) - (2)]).traducao;
 			}
     break;
 
+  case 7:
+#line 70 "sintatica.y"
+    {
+				(yyval) = (yyvsp[(1) - (2)]);
+
+				cout << "AQUIII ________ \n" << "Label: " << (yyvsp[(1) - (2)]).label << "\nTrad: " << (yyvsp[(1) - (2)]).traducao << "\n ACABOUU ---" <<endl; 
+			}
+    break;
+
+  case 8:
+#line 82 "sintatica.y"
+    {
+				(yyvsp[(2) - (2)]).tipo = (yyvsp[(1) - (2)]).tipo;
+				(yyval).traducao = (yyvsp[(1) - (2)]).traducao + (yyvsp[(2) - (2)]).traducao;
+
+				// cout << "AQUIII ________ \n" << "Label: " << $$.label << "\nTrad: " << $$.traducao << "\n ACABOUU ---" <<endl; 
+
+			}
+    break;
+
   case 9:
-#line 84 "sintatica.y"
+#line 92 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_INT;
 				(yyval).traducao = (yyvsp[(1) - (1)]).traducao;
@@ -1428,7 +1440,7 @@ yyreduce:
     break;
 
   case 10:
-#line 89 "sintatica.y"
+#line 97 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_FLOAT;
 				(yyval).traducao = (yyvsp[(1) - (1)]).traducao;
@@ -1436,7 +1448,7 @@ yyreduce:
     break;
 
   case 11:
-#line 94 "sintatica.y"
+#line 102 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_CHAR;
 				(yyval).traducao = (yyvsp[(1) - (1)]).traducao;
@@ -1444,7 +1456,7 @@ yyreduce:
     break;
 
   case 12:
-#line 99 "sintatica.y"
+#line 107 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_BOOL;
 				(yyval).traducao = (yyvsp[(1) - (1)]).traducao;
@@ -1452,7 +1464,7 @@ yyreduce:
     break;
 
   case 13:
-#line 104 "sintatica.y"
+#line 112 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_STRING;
 				(yyval).traducao = (yyvsp[(1) - (1)]).traducao;
@@ -1460,14 +1472,14 @@ yyreduce:
     break;
 
   case 14:
-#line 110 "sintatica.y"
+#line 118 "sintatica.y"
     {
 				(yyval).traducao = (yyvsp[(1) - (1)]).traducao;
 			}
     break;
 
   case 15:
-#line 116 "sintatica.y"
+#line 124 "sintatica.y"
     {
 				cout << "VARLIST, TK_ID _______" <<endl;
 
@@ -1477,17 +1489,19 @@ yyreduce:
 				variavel v = criadorDeVariavel((yyvsp[(3) - (3)]).label, nome, get_var_tipo((yyvsp[(0) - (3)]).tipo), 0);
 				// addVarEsc(tack, v);
 
-				cout << " ->>>> " << tack->v[0][(yyvsp[(3) - (3)]).label].var_name << endl;
-				cout << " ->>>> " << tack->v[0][(yyvsp[(3) - (3)]).label].temp_name << endl;
-				cout << " ->>>> " << tack->v[0][(yyvsp[(3) - (3)]).label].tipo << endl;
+				// cout << " ->>>> " << tack->v[0][$3.label].var_name << endl;
+				// cout << " ->>>> " << tack->v[0][$3.label].temp_name << endl;
+				// cout << " ->>>> " << tack->v[0][$3.label].tipo << endl;
 
 			}
     break;
 
   case 16:
-#line 131 "sintatica.y"
+#line 139 "sintatica.y"
     {	
-				cout << "TK_ID = E_______" <<endl;
+				
+
+				cout << "TK_ID = E_______ " << (yyvsp[(1) - (3)]).label <<endl;
 				string nome = gerar_nomes_var();
 				// inferir tipo
 				string tipo_v = "";
@@ -1513,12 +1527,16 @@ yyreduce:
 				cout << " ->>>> " << tack->v[0][(yyvsp[(1) - (3)]).label].var_name << endl;
 				cout << " ->>>> " << tack->v[0][(yyvsp[(1) - (3)]).label].temp_name << endl;
 				cout << " ->>>> " << tack->v[0][(yyvsp[(1) - (3)]).label].tipo << endl;
+
+
+				// $$.traducao = $1.traducao + $3.traducao + "\t" + nome + " = " + $3.label + ";\n";
+				(yyval).traducao = (yyvsp[(1) - (3)]).traducao + (yyvsp[(3) - (3)]).traducao + "\t" + nome + " = " + (yyvsp[(3) - (3)]).label + ";\n";
 					 
 			}
     break;
 
   case 17:
-#line 161 "sintatica.y"
+#line 175 "sintatica.y"
     {
 				cout << "TK_ID _______" <<endl;
 
@@ -1544,14 +1562,14 @@ yyreduce:
     break;
 
   case 18:
-#line 186 "sintatica.y"
+#line 200 "sintatica.y"
     {
 				(yyval) = (yyvsp[(2) - (3)]);
 			}
     break;
 
   case 19:
-#line 190 "sintatica.y"
+#line 204 "sintatica.y"
     {
 				(yyval).tipo = (yyvsp[(2) - (2)]).tipo;
 
@@ -1568,35 +1586,35 @@ yyreduce:
     break;
 
   case 20:
-#line 204 "sintatica.y"
+#line 218 "sintatica.y"
     {
 				(yyval) = arith((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), "-");
 			}
     break;
 
   case 21:
-#line 208 "sintatica.y"
+#line 222 "sintatica.y"
     {
 				(yyval) = arith((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), "+");
 			}
     break;
 
   case 22:
-#line 212 "sintatica.y"
+#line 226 "sintatica.y"
     {
 				(yyval) = arith((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), "*");
 			}
     break;
 
   case 23:
-#line 216 "sintatica.y"
+#line 230 "sintatica.y"
     {
 				(yyval) = arith((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), "/");
 			}
     break;
 
   case 24:
-#line 220 "sintatica.y"
+#line 234 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_INT;
 
@@ -1610,7 +1628,7 @@ yyreduce:
     break;
 
   case 25:
-#line 231 "sintatica.y"
+#line 245 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_FLOAT;
 
@@ -1624,7 +1642,7 @@ yyreduce:
     break;
 
   case 26:
-#line 242 "sintatica.y"
+#line 256 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_STRING;
 
@@ -1639,7 +1657,7 @@ yyreduce:
     break;
 
   case 27:
-#line 254 "sintatica.y"
+#line 268 "sintatica.y"
     {
 				(yyval).traducao = (yyvsp[(1) - (1)]).traducao;
 			}
@@ -1647,7 +1665,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1651 "y.tab.c"
+#line 1669 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1861,7 +1879,7 @@ yyreturn:
 }
 
 
-#line 259 "sintatica.y"
+#line 273 "sintatica.y"
 
 
 #include "lex.yy.c"

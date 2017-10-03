@@ -1,11 +1,8 @@
 int main()
 {
 
-	var aa = 5;
 	int aaa = 5;
-	float bb;
-	char c, d, e;
-	bool f, g;
-	string h, i;
+	int bbb = 8;
+	float r = 3.0;
 
 }

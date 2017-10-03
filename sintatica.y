@@ -59,13 +59,21 @@ BLOCO		: '{' COMANDOS '}'
 			;
 
 COMANDOS	: COMANDO COMANDOS
-			|
+			{
+				$$.traducao = $1.traducao + $2.traducao;
+			}
+			| // vazio
+			{
+				$$.traducao = "";
+			}
 			;
 
 COMANDO 	: E ';'
 			| DECLARATION ';'
 			{
 				$$ = $1;
+
+				cout << "AQUIII ________ \n" << "Label: " << $1.label << "\nTrad: " << $1.traducao << "\n ACABOUU ---" <<endl; 
 			}
 			// | ATRIB
 			// {
@@ -77,6 +85,9 @@ DECLARATION	: TIPO VARLIST
 			{
 				$2.tipo = $1.tipo;
 				$$.traducao = $1.traducao + $2.traducao;
+
+				// cout << "AQUIII ________ \n" << "Label: " << $$.label << "\nTrad: " << $$.traducao << "\n ACABOUU ---" <<endl; 
+
 			}
 			;
 
@@ -122,14 +133,16 @@ VARLIST 	: VARLIST ',' TK_ID
 				variavel v = criadorDeVariavel($3.label, nome, get_var_tipo($0.tipo), 0);
 				// addVarEsc(tack, v);
 
-				cout << " ->>>> " << tack->v[0][$3.label].var_name << endl;
-				cout << " ->>>> " << tack->v[0][$3.label].temp_name << endl;
-				cout << " ->>>> " << tack->v[0][$3.label].tipo << endl;
+				// cout << " ->>>> " << tack->v[0][$3.label].var_name << endl;
+				// cout << " ->>>> " << tack->v[0][$3.label].temp_name << endl;
+				// cout << " ->>>> " << tack->v[0][$3.label].tipo << endl;
 
 			}
 			| TK_ID '=' E	
 			{	
-				cout << "TK_ID = E_______" <<endl;
+				
+
+				cout << "TK_ID = E_______ " << $1.label <<endl;
 				string nome = gerar_nomes_var();
 				// inferir tipo
 				string tipo_v = "";
@@ -155,6 +168,10 @@ VARLIST 	: VARLIST ',' TK_ID
 				cout << " ->>>> " << tack->v[0][$1.label].var_name << endl;
 				cout << " ->>>> " << tack->v[0][$1.label].temp_name << endl;
 				cout << " ->>>> " << tack->v[0][$1.label].tipo << endl;
+
+
+				// $$.traducao = $1.traducao + $3.traducao + "\t" + nome + " = " + $3.label + ";\n";
+				$$.traducao = $1.traducao + $3.traducao + "\t" + nome + " = " + $3.label + ";\n";
 					 
 			}
 			| TK_ID

@@ -95,6 +95,8 @@ string getDeclaradas(varsDeclaradas vars){
 	string line_bool = "bool";
 	string line_string = "";
 
+	int i_int, i_float, i_char, i_bool, i_string = 0;
+
 	for (int i = 0; i < vars.size(); ++i)
 	{
 		variavel v = vars[i];
@@ -102,45 +104,60 @@ string getDeclaradas(varsDeclaradas vars){
 		if (v.tipo == "string")
 		{
 			line += "char* " + v.temp_name + " = (char*) malloc(sizeof(char) * " + to_string(v.tamanho) + " ); \n";
+			i_string = 1;
 		}
 		else if(v.tipo == "int"){
 		
 			line_int += " " + v.temp_name + ",";
+			i_int = 1;
 
 		}
 		else if(v.tipo == "float"){
 		
 			line_float += " " + v.temp_name + ",";
+			i_float = 1;
 
 		}
 		else if(v.tipo == "char"){
 		
 			line_char += " " + v.temp_name + ",";
+			i_char = 1;
 
 		}
 		else if(v.tipo == "bool"){
 		
 			line_bool += " " + v.temp_name + ",";
+			i_bool = 1;
 
 		}
 
 	}
 
-	line_int.pop_back();
-	line_float.pop_back();
-	line_char.pop_back();
-	line_bool.pop_back();
-
-	line_int += ";\n";
-	line_float += ";\n";
-	line_char += ";\n";
-	line_bool += ";\n";
-
-
-	line += line_int;
-	line += line_float;
-	line += line_char;
-	line += line_bool;
+	if (i_int == 1)
+	{
+		line_int.pop_back();
+		line_int += ";\n";
+		line += line_int;
+	}
+	if (i_float == 1)
+	{
+		line_float.pop_back();
+		line_float += ";\n";
+		line += line_float;
+	}
+	if (i_char == 1)
+	{
+		line_char.pop_back();
+		line_char += ";\n";
+		line += line_char;
+	}
+	if (i_bool == 1)
+	{
+		line_bool.pop_back();
+		line_bool += ";\n";	
+		line += line_bool;
+	}
+	
 
 	return line;
 }
