@@ -1,22 +1,19 @@
 int main()
 {
-	int a = 5;
+	var a = 5;
 
-	int b = 10;
+	var b = 3;
 
-	float c = 3.5;
+	var d = a > b;
 
-	bool d;
+	var e = a < b;
 
-	char e = 'd';
+	var f = a >= b;
 
+	var g = a <= b;
 
-	var f = a + b;
+	var h = a == b;
 
-	var g = b + c;
-
-	var h = b + a;
-
-	var i = c + 5;
+	bool z = a != b;
 
 }

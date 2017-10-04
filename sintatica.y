@@ -73,17 +73,17 @@ COMANDOS	: COMANDO COMANDOS
 			}
 			;
 
-COMANDO 	: E ';'
-			| DECLARATION ';'
+COMANDO 	: DECLARATION ';'
 			{
 				$$ = $1;
 
-				cout << "AQUIII ________ \n" << "Label: " << $1.label << "\nTrad: " << $1.traducao << "\n ACABOUU ---" <<endl; 
+				// cout << "AQUIII ________ \n" << "Label: " << $1.label << "\nTrad: " << $1.traducao << "\n ACABOUU ---" <<endl; 
 			}
 			| ATRIB ';'
 			{
 				$$ = $1;
 			}
+			// | E ';'
 			;
 
 DECLARATION	: TIPO VARLIST
@@ -130,7 +130,7 @@ TIPO 		: TK_TIPO_INT
 
 VARLIST 	: VARLIST ',' TK_ID
 			{
-				cout << "VARLIST, TK_ID _______" <<endl;
+				// cout << "VARLIST, TK_ID _______" <<endl;
 
 				string nome = gerar_nomes_var();
 				$$.traducao = $1.traducao + $3.traducao;
@@ -156,7 +156,7 @@ VARLIST 	: VARLIST ',' TK_ID
 			{	
 				
 
-				cout << "TK_ID = E_______ " << $1.label <<endl;
+				// cout << "TK_ID = E_______ " << $1.label <<endl;
 				string nome = gerar_nomes_var();
 				// inferir tipo
 				string tipo_v = "";
@@ -187,16 +187,16 @@ VARLIST 	: VARLIST ',' TK_ID
 
 				// addVarEsc(tack, v);
 
-				cout << " ->>>> " << tack->v[0][$1.label].var_name << endl;
-				cout << " ->>>> " << tack->v[0][$1.label].temp_name << endl;
-				cout << " ->>>> " << tack->v[0][$1.label].tipo << endl;
+				// cout << " ->>>> " << tack->v[0][$1.label].var_name << endl;
+				// cout << " ->>>> " << tack->v[0][$1.label].temp_name << endl;
+				// cout << " ->>>> " << tack->v[0][$1.label].tipo << endl;
 
-				cout << " ->>>> " << get_var_tipo($3.tipo) << endl;
+				// cout << " ->>>> " << get_var_tipo($3.tipo) << endl;
 
 
-				cout << " ->>>> " << get_var($1.label).var_name << endl;
-				cout << " ->>>> " << get_var($1.label).temp_name << endl;
-				cout << " ->>>> " << get_var($1.label).tipo << endl;
+				// cout << " ->>>> " << get_var($1.label).var_name << endl;
+				// cout << " ->>>> " << get_var($1.label).temp_name << endl;
+				// cout << " ->>>> " << get_var($1.label).tipo << endl;
 
 
 				variavel minha_var = get_var($1.label);
@@ -240,9 +240,9 @@ VARLIST 	: VARLIST ',' TK_ID
 
 				// for (int i = 0; i < tack->v.size(); ++i)
 				// {
-					cout << " ->>>> " << tack->v[0][$$.label].var_name << endl;
-					cout << " ->>>> " << tack->v[0][$$.label].temp_name << endl;
-					cout << " ->>>> " << tack->v[0][$$.label].tipo << endl;
+					// cout << " ->>>> " << tack->v[0][$$.label].var_name << endl;
+					// cout << " ->>>> " << tack->v[0][$$.label].temp_name << endl;
+					// cout << " ->>>> " << tack->v[0][$$.label].tipo << endl;
 					 
 				// }
 
@@ -275,12 +275,12 @@ ATRIB 		: TK_ID '=' E
 					if (get_var_tipo($-2.tipo) != "")
 					{	
 						tipo_v = get_var_tipo($-2.tipo);
-						cout << "1" << endl;
+						// cout << "1" << endl;
 					}
 					else // se tipo nao foi dito -> x = 9
 					{
 						tipo_v = get_var_tipo($3.tipo);
-						cout << "2" << endl;
+						// cout << "2" << endl;
 						
 					}
 
@@ -330,7 +330,7 @@ ATRIB 		: TK_ID '=' E
 
 				}
 
-				cout << "TA AQUI2" << endl;
+				// cout << "TA AQUI2" << endl;
 
 
 
@@ -435,7 +435,7 @@ E 			: '(' E ')'
 				// $$.tipo = TK_TIPO_BOOL;
 				string nome = gerar_nomes_var();
 
-				$$.traducao = $1.traducao + $3.traducao + "\t" + ;
+				// $$.traducao = $1.traducao + $3.traducao + "\t" + ;
 
 				$$.label = nome;
 			}
@@ -445,7 +445,7 @@ E 			: '(' E ')'
 				// $$.tipo = TK_TIPO_BOOL;
 				string nome = gerar_nomes_var();
 
-				$$.traducao = $1.traducao + $3.traducao + "\t" + ;
+				// $$.traducao = $1.traducao + $3.traducao + "\t" + ;
 
 				$$.label = nome;
 			}
@@ -455,7 +455,7 @@ E 			: '(' E ')'
 				// $$.tipo = TK_TIPO_BOOL;
 				string nome = gerar_nomes_var();
 
-				$$.traducao = $1.traducao + $3.traducao + "\t" + ;
+				// $$.traducao = $3.traducao + "\t" + ;
 
 				$$.label = nome;
 			}
@@ -510,8 +510,8 @@ E 			: '(' E ')'
 					$$.tipo = get_var_tipo_token(v.tipo);
 				}
 
-				cout << "TA AQUI" << endl;
-				cout << v.var_name << endl;
+				// cout << "TA AQUI" << endl;
+				// cout << v.var_name << endl;
 
 			}
 			;
@@ -526,12 +526,12 @@ int main( int argc, char* argv[] )
 {
 	yyparse();
 
-	for (int i = 0; i < varsDec.size(); ++i)
-	{
-		cout << " ->>>> " << get_var(varsDec[i].var_name).var_name << endl;
-		cout << " ->>>> " << get_var(varsDec[i].var_name).temp_name << endl;
-		cout << " ->>>> " << get_var(varsDec[i].var_name).tipo << endl;
-	}
+	// for (int i = 0; i < varsDec.size(); ++i)
+	// {
+	// 	cout << " ->>>> " << get_var(varsDec[i].var_name).var_name << endl;
+	// 	cout << " ->>>> " << get_var(varsDec[i].var_name).temp_name << endl;
+	// 	cout << " ->>>> " << get_var(varsDec[i].var_name).tipo << "\n" << endl;
+	// }
 
 	return 0;
 }
@@ -737,6 +737,8 @@ atributos arith(atributos a1, atributos a2, string sinal){
 
 
 variavel get_var(string name){
+
+	// quando for blocos devo procurar no vetor
 
 	return tack->v[tack->escopo_num][name];
 }

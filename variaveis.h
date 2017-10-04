@@ -101,12 +101,12 @@ string getDeclaradas(varsDeclaradas vars){
 	{
 		variavel v = vars[i];
 
-		if (v.tipo == "string")
-		{
-			line += "char* " + v.temp_name + " = (char*) malloc(sizeof(char) * " + to_string(v.tamanho) + " ); \n";
-			i_string = 1;
-		}
-		else if(v.tipo == "int"){
+		// if (v.tipo == "string")
+		// {
+		// 	line += "char* " + v.temp_name + " = (char*) malloc(sizeof(char) * " + to_string(v.tamanho) + " ); \n";
+		// 	i_string = 1;
+		// }
+		if(v.tipo == "int"){
 		
 			line_int += " " + v.temp_name + ",";
 			i_int = 1;
@@ -125,9 +125,11 @@ string getDeclaradas(varsDeclaradas vars){
 
 		}
 		else if(v.tipo == "bool"){
-		
-			line_bool += " " + v.temp_name + ",";
-			i_bool = 1;
+			
+			line_int += " " + v.temp_name + ",";
+			i_int = 1;
+			// line_bool += " " + v.temp_name + ",";
+			// i_bool = 1;
 
 		}
 
@@ -151,12 +153,12 @@ string getDeclaradas(varsDeclaradas vars){
 		line_char += ";\n";
 		line += line_char;
 	}
-	if (i_bool == 1)
-	{
-		line_bool.pop_back();
-		line_bool += ";\n";	
-		line += line_bool;
-	}
+	// if (i_bool == 1)
+	// {
+	// 	line_bool.pop_back();
+	// 	line_bool += ";\n";	
+	// 	line += line_bool;
+	// }
 	
 
 	return line;

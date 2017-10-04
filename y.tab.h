@@ -50,8 +50,15 @@
      TK_TIPO_CHAR = 266,
      TK_TIPO_BOOL = 267,
      TK_TIPO_STRING = 268,
-     TK_FIM = 269,
-     TK_ERROR = 270
+     TK_EQUAL = 269,
+     TK_GTE = 270,
+     TK_LTE = 271,
+     TK_NEQUAL = 272,
+     TK_AND = 273,
+     TK_OR = 274,
+     TK_NOT = 275,
+     TK_FIM = 276,
+     TK_ERROR = 277
    };
 #endif
 /* Tokens.  */
@@ -66,8 +73,15 @@
 #define TK_TIPO_CHAR 266
 #define TK_TIPO_BOOL 267
 #define TK_TIPO_STRING 268
-#define TK_FIM 269
-#define TK_ERROR 270
+#define TK_EQUAL 269
+#define TK_GTE 270
+#define TK_LTE 271
+#define TK_NEQUAL 272
+#define TK_AND 273
+#define TK_OR 274
+#define TK_NOT 275
+#define TK_FIM 276
+#define TK_ERROR 277
 
 
 
