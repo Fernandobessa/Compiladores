@@ -41,7 +41,7 @@
    enum yytokentype {
      TK_NUM = 258,
      TK_REAL = 259,
-     TK_STRING = 260,
+     TK_CHAR = 260,
      TK_MAIN = 261,
      TK_ID = 262,
      TK_TIPO_VAR = 263,
@@ -57,7 +57,7 @@
 /* Tokens.  */
 #define TK_NUM 258
 #define TK_REAL 259
-#define TK_STRING 260
+#define TK_CHAR 260
 #define TK_MAIN 261
 #define TK_ID 262
 #define TK_TIPO_VAR 263

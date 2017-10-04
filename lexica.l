@@ -38,10 +38,28 @@ STRING	\"[^\"]*\"
 
 [+\-*/=]		{ return *yytext; }
 
+">"         { return *yytext;}
+
+"<"         { return *yytext;}
+
+">="        { return TK_GTE;}
+
+"<="        { return TK_LTE; }
+
+"=="        { return TK_EQUAL;  }
+
+"!="        { return TK_NEQUAL;  }
+
+"and"       { return TK_AND;  }
+
+"or"        { return TK_OR;  }
+
+"not"       { return TK_NOT; }
+
 {NUM}		{ yylval.label = yytext; return TK_NUM; }
 {REAL}		{ yylval.label = yytext; return TK_REAL;}
 {ID}		{ yylval.label = yytext; return TK_ID; }
-{STRING}	{ yylval.label = yytext; return TK_STRING; }
+{CHAR}	{ yylval.label = yytext; return TK_CHAR; }
 
 .			{ *yytext; }
 
