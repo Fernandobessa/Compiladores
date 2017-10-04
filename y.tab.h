@@ -42,46 +42,48 @@
      TK_NUM = 258,
      TK_REAL = 259,
      TK_CHAR = 260,
-     TK_MAIN = 261,
-     TK_ID = 262,
-     TK_TIPO_VAR = 263,
-     TK_TIPO_INT = 264,
-     TK_TIPO_FLOAT = 265,
-     TK_TIPO_CHAR = 266,
-     TK_TIPO_BOOL = 267,
-     TK_TIPO_STRING = 268,
-     TK_EQUAL = 269,
-     TK_GTE = 270,
-     TK_LTE = 271,
-     TK_NEQUAL = 272,
-     TK_AND = 273,
-     TK_OR = 274,
-     TK_NOT = 275,
-     TK_FIM = 276,
-     TK_ERROR = 277
+     TK_BOOL = 261,
+     TK_MAIN = 262,
+     TK_ID = 263,
+     TK_TIPO_VAR = 264,
+     TK_TIPO_INT = 265,
+     TK_TIPO_FLOAT = 266,
+     TK_TIPO_CHAR = 267,
+     TK_TIPO_BOOL = 268,
+     TK_TIPO_STRING = 269,
+     TK_EQUAL = 270,
+     TK_GTE = 271,
+     TK_LTE = 272,
+     TK_NEQUAL = 273,
+     TK_AND = 274,
+     TK_OR = 275,
+     TK_NOT = 276,
+     TK_FIM = 277,
+     TK_ERROR = 278
    };
 #endif
 /* Tokens.  */
 #define TK_NUM 258
 #define TK_REAL 259
 #define TK_CHAR 260
-#define TK_MAIN 261
-#define TK_ID 262
-#define TK_TIPO_VAR 263
-#define TK_TIPO_INT 264
-#define TK_TIPO_FLOAT 265
-#define TK_TIPO_CHAR 266
-#define TK_TIPO_BOOL 267
-#define TK_TIPO_STRING 268
-#define TK_EQUAL 269
-#define TK_GTE 270
-#define TK_LTE 271
-#define TK_NEQUAL 272
-#define TK_AND 273
-#define TK_OR 274
-#define TK_NOT 275
-#define TK_FIM 276
-#define TK_ERROR 277
+#define TK_BOOL 261
+#define TK_MAIN 262
+#define TK_ID 263
+#define TK_TIPO_VAR 264
+#define TK_TIPO_INT 265
+#define TK_TIPO_FLOAT 266
+#define TK_TIPO_CHAR 267
+#define TK_TIPO_BOOL 268
+#define TK_TIPO_STRING 269
+#define TK_EQUAL 270
+#define TK_GTE 271
+#define TK_LTE 272
+#define TK_NEQUAL 273
+#define TK_AND 274
+#define TK_OR 275
+#define TK_NOT 276
+#define TK_FIM 277
+#define TK_ERROR 278
 
 
 

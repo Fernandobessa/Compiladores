@@ -56,6 +56,10 @@ STRING	\"[^\"]*\"
 
 "not"       { return TK_NOT; }
 
+"true"		{ yylval.label = yytext; return TK_BOOL; }
+
+"false"		{ yylval.label = yytext; return TK_BOOL; }
+
 {NUM}		{ yylval.label = yytext; return TK_NUM; }
 {REAL}		{ yylval.label = yytext; return TK_REAL;}
 {ID}		{ yylval.label = yytext; return TK_ID; }

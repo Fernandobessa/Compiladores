@@ -37,7 +37,7 @@ atributos arith(atributos, atributos, string);
 variavel get_var(string);
 %}
 
-%token TK_NUM TK_REAL TK_CHAR
+%token TK_NUM TK_REAL TK_CHAR TK_BOOL
 %token TK_MAIN TK_ID TK_TIPO_VAR TK_TIPO_INT TK_TIPO_FLOAT TK_TIPO_CHAR TK_TIPO_BOOL TK_TIPO_STRING
 %token TK_EQUAL TK_GTE TK_LTE TK_NEQUAL
 %token TK_AND TK_OR TK_NOT
@@ -512,6 +512,17 @@ E 			: '(' E ')'
 
 				// cout << "TA AQUI" << endl;
 				// cout << v.var_name << endl;
+
+			}
+			| TK_BOOL
+			{
+				$$.tipo = TK_TIPO_BOOL;
+
+				string nome = gerar_nomes_var();
+				$$.traducao = "\t" + nome + " = " + $1.label + ";\n";
+				$$.label = nome;
+
+				variavel v = criadorDeVariavel(nome, nome, get_var_tipo($$.tipo), 0);
 
 			}
 			;
