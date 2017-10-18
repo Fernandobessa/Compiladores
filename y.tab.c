@@ -144,16 +144,16 @@ varsDeclaradas varsDec;
 // Functions
 int yylex(void);
 void yyerror(string);
-string declararVars();
+string exibirVarsDeclaradas();
 variavel criadorDeVariavel(string, string, string, int);
-string gerar_nomes_var();
-int get_var_tipo_token(string);
-string get_var_tipo(int);
-atributos logic(int, string, int, string, string);
-atributos arith_com_cast(int, string, int, string, string);
-int typeOfArith(int, int);
-atributos arith(atributos, atributos, string);
-variavel get_var(string);
+string geradoraDeNomeDeVariaveis();
+int getTipoToken(string);
+string getTipoString(int);
+atributos tratadoraLogic(int, string, int, string, string);
+atributos tratarArithComCast(int, string, int, string, string);
+int tipoResult(int, int);
+atributos tratadoraArith(atributos, atributos, string);
+variavel getVarPorNome(string);
 
 
 /* Enabling traces.  */
@@ -486,9 +486,9 @@ static const yytype_int8 yyrhs[] =
 static const yytype_uint16 yyrline[] =
 {
        0,    54,    54,    60,    66,    71,    76,    82,    89,    99,
-     104,   109,   114,   119,   125,   131,   146,   155,   227,   252,
-     341,   345,   362,   366,   370,   374,   378,   387,   396,   405,
-     414,   423,   432,   442,   452,   462,   473,   484,   496,   517
+     104,   109,   114,   119,   125,   131,   146,   161,   227,   252,
+     337,   341,   358,   362,   366,   370,   374,   383,   392,   401,
+     410,   419,   428,   443,   458,   473,   484,   495,   507,   528
 };
 #endif
 
@@ -1439,7 +1439,7 @@ yyreduce:
         case 2:
 #line 55 "sintatica.y"
     {
-				cout << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\n" << declararVars() << "\nint main(void)\n{\n" << (yyvsp[(5) - (5)]).traducao << "\treturn 0;\n}" << endl; 
+				cout << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\n" << exibirVarsDeclaradas() << "\nint main(void)\n{\n" << (yyvsp[(5) - (5)]).traducao << "\treturn 0;\n}" << endl; 
 			}
     break;
 
@@ -1543,10 +1543,10 @@ yyreduce:
     {
 				// cout << "VARLIST, TK_ID _______" <<endl;
 
-				string nome = gerar_nomes_var();
+				string nome = geradoraDeNomeDeVariaveis();
 				(yyval).traducao = (yyvsp[(1) - (3)]).traducao + (yyvsp[(3) - (3)]).traducao;
 
-				variavel v = criadorDeVariavel((yyvsp[(3) - (3)]).label, nome, get_var_tipo((yyvsp[(0) - (3)]).tipo), 0);
+				variavel v = criadorDeVariavel((yyvsp[(3) - (3)]).label, nome, getTipoString((yyvsp[(0) - (3)]).tipo), 0);
 				// addVarEsc(tack, v);
 
 				// cout << " ->>>> " << tack->v[0][$3.label].var_name << endl;
@@ -1565,31 +1565,35 @@ yyreduce:
 				(yyvsp[(1) - (3)]).tipo = (yyvsp[(0) - (3)]).tipo;
 				(yyvsp[(3) - (3)]).tipo = (yyvsp[(0) - (3)]).tipo;
 
+				cout << "label>>>>> " << (yyvsp[(1) - (3)]).label << endl;
+				cout << "traducao>>>>> " << (yyvsp[(1) - (3)]).traducao << endl;
+
+				cout << "label>>>>> " << (yyvsp[(3) - (3)]).label << endl;
+				cout << "traducao>>>>> " << (yyvsp[(3) - (3)]).traducao << endl;
+
 			}
     break;
 
   case 17:
-#line 156 "sintatica.y"
-    {	
-				
-
+#line 162 "sintatica.y"
+    {
 				// cout << "TK_ID = E_______ " << $1.label <<endl;
-				string nome = gerar_nomes_var();
+				string nome = geradoraDeNomeDeVariaveis();
 				// inferir tipo
 				string tipo_v = "";
 
 				// se o tipo foi dito -> int x = 9
-				if (get_var_tipo((yyvsp[(0) - (3)]).tipo) != "")
+				if (getTipoString((yyvsp[(0) - (3)]).tipo) != "")
 				{	
 					// cout << "1" << endl;
-					tipo_v = get_var_tipo((yyvsp[(0) - (3)]).tipo);
+					tipo_v = getTipoString((yyvsp[(0) - (3)]).tipo);
 				}
 				else // se tipo nao foi dito -> x = 9
 				{
 					// cout << "2" << endl;
 					// cout << $3.tipo << endl;
 
-					tipo_v = get_var_tipo((yyvsp[(3) - (3)]).tipo);
+					tipo_v = getTipoString((yyvsp[(3) - (3)]).tipo);
 				}
 
 				// tipo da expressao = bool e tipo da variavel nao for bool
@@ -1608,20 +1612,20 @@ yyreduce:
 				// cout << " ->>>> " << tack->v[0][$1.label].temp_name << endl;
 				// cout << " ->>>> " << tack->v[0][$1.label].tipo << endl;
 
-				// cout << " ->>>> " << get_var_tipo($3.tipo) << endl;
+				// cout << " ->>>> " << getTipoString($3.tipo) << endl;
 
 
-				// cout << " ->>>> " << get_var($1.label).var_name << endl;
-				// cout << " ->>>> " << get_var($1.label).temp_name << endl;
-				// cout << " ->>>> " << get_var($1.label).tipo << endl;
+				// cout << " ->>>> " << getVarPorNome($1.label).var_name << endl;
+				// cout << " ->>>> " << getVarPorNome($1.label).temp_name << endl;
+				// cout << " ->>>> " << getVarPorNome($1.label).tipo << endl;
 
 
-				variavel minha_var = get_var((yyvsp[(1) - (3)]).label);
+				variavel minha_var = getVarPorNome((yyvsp[(1) - (3)]).label);
 
 				// variavel com tipo diferente da expressao
-				if (minha_var.tipo != get_var_tipo((yyvsp[(3) - (3)]).tipo))
+				if (minha_var.tipo != getTipoString((yyvsp[(3) - (3)]).tipo))
 				{
-					string nomeReal = gerar_nomes_var();
+					string nomeReal = geradoraDeNomeDeVariaveis();
 
 					// castiando [to-do] verificar isso aqui, se nomeReal troca de lugar com nome
 					(yyval).traducao = (yyvsp[(1) - (3)]).traducao + (yyvsp[(3) - (3)]).traducao; 
@@ -1635,24 +1639,20 @@ yyreduce:
 					(yyval).traducao = (yyvsp[(1) - (3)]).traducao + (yyvsp[(3) - (3)]).traducao + "\t" + nome + " = " + (yyvsp[(3) - (3)]).label + ";\n";
 
 				}
-				
-
-
-
-					 
+	 
 			}
     break;
 
   case 18:
 #line 228 "sintatica.y"
     {
-				cout << "TK_ID _______" <<endl;
+				// cout << "TK_ID _______" <<endl;
 
 				// tipo nome_var;
 				(yyval).traducao = (yyvsp[(1) - (1)]).traducao;
 				(yyval).label = (yyvsp[(1) - (1)]).label;
 
-				variavel v = criadorDeVariavel((yyval).label, gerar_nomes_var(), get_var_tipo((yyvsp[(0) - (1)]).tipo), 0);
+				variavel v = criadorDeVariavel((yyval).label, geradoraDeNomeDeVariaveis(), getTipoString((yyvsp[(0) - (1)]).tipo), 0);
 
 				// cout << v.var_name << endl;
 
@@ -1672,35 +1672,31 @@ yyreduce:
   case 19:
 #line 253 "sintatica.y"
     {
-				variavel v = get_var((yyvsp[(1) - (3)]).label);
+				variavel v = getVarPorNome((yyvsp[(1) - (3)]).label);
 				string nome = v.temp_name;
-
-				
-
-
 
 				// variavel nao existe
 				if (nome == "")
 				{
 					string tipo_v;
 
-					nome = gerar_nomes_var();
+					nome = geradoraDeNomeDeVariaveis();
 
 
-					// cout << get_var_tipo($-2.tipo) << endl;
+					// cout << getTipoString($-2.tipo) << endl;
 
-					// cout << get_var_tipo($3.tipo) << endl;
+					// cout << getTipoString($3.tipo) << endl;
 
 					// $-2 pois pra chegar em ATRIB eu vim por VARLIST de DECLARATION
 					// se vier direto de COMANDO deve ser $0
-					if (get_var_tipo((yyvsp[(-2) - (3)]).tipo) != "")
+					if (getTipoString((yyvsp[(-2) - (3)]).tipo) != "")
 					{	
-						tipo_v = get_var_tipo((yyvsp[(-2) - (3)]).tipo);
+						tipo_v = getTipoString((yyvsp[(-2) - (3)]).tipo);
 						// cout << "1" << endl;
 					}
 					else // se tipo nao foi dito -> x = 9
 					{
-						tipo_v = get_var_tipo((yyvsp[(3) - (3)]).tipo);
+						tipo_v = getTipoString((yyvsp[(3) - (3)]).tipo);
 						// cout << "2" << endl;
 						
 					}
@@ -1718,9 +1714,9 @@ yyreduce:
 
 				}
 				else{
-					// if (get_var_tipo($0.tipo) != "")
+					// if (getTipoString($0.tipo) != "")
 					// {	
-					// 	tipo_v = get_var_tipo($0.tipo);
+					// 	tipo_v = getTipoString($0.tipo);
 					// 	cout << "1" << endl;
 					// }
 					
@@ -1734,9 +1730,9 @@ yyreduce:
 
 
 
-				if (v.tipo != get_var_tipo((yyvsp[(3) - (3)]).tipo))
+				if (v.tipo != getTipoString((yyvsp[(3) - (3)]).tipo))
 				{
-					string nomeReal = gerar_nomes_var();
+					string nomeReal = geradoraDeNomeDeVariaveis();
 
 					// castiando [to-do] verificar isso aqui, se nomeReal troca de lugar com nome
 					(yyval).traducao = (yyvsp[(1) - (3)]).traducao + (yyvsp[(3) - (3)]).traducao; 
@@ -1760,18 +1756,18 @@ yyreduce:
     break;
 
   case 20:
-#line 342 "sintatica.y"
+#line 338 "sintatica.y"
     {
 				(yyval) = (yyvsp[(2) - (3)]);
 			}
     break;
 
   case 21:
-#line 346 "sintatica.y"
+#line 342 "sintatica.y"
     {
 				(yyval).tipo = (yyvsp[(2) - (2)]).tipo;
 
-				string nome = gerar_nomes_var();
+				string nome = geradoraDeNomeDeVariaveis();
 				// temp(x+1) = -temp(x); usa -temp(x)
 				// $$.label = "-" + $2.label; 
 				// temp(x+1) = -temp(x); usa temp(x+1)
@@ -1779,7 +1775,7 @@ yyreduce:
 
 				(yyval).traducao = (yyvsp[(2) - (2)]).traducao + "\t" + nome + " = -" + (yyvsp[(2) - (2)]).label + ";\n";
 
-				variavel v = criadorDeVariavel(nome, nome, get_var_tipo((yyval).tipo), 0);
+				variavel v = criadorDeVariavel(nome, nome, getTipoString((yyval).tipo), 0);
 
 				 
 
@@ -1787,39 +1783,39 @@ yyreduce:
     break;
 
   case 22:
-#line 363 "sintatica.y"
+#line 359 "sintatica.y"
     {
-				(yyval) = arith((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), "-");
+				(yyval) = tratadoraArith((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), "-");
 			}
     break;
 
   case 23:
-#line 367 "sintatica.y"
+#line 363 "sintatica.y"
     {
-				(yyval) = arith((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), "+");
+				(yyval) = tratadoraArith((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), "+");
 			}
     break;
 
   case 24:
-#line 371 "sintatica.y"
+#line 367 "sintatica.y"
     {
-				(yyval) = arith((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), "*");
+				(yyval) = tratadoraArith((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), "*");
 			}
     break;
 
   case 25:
-#line 375 "sintatica.y"
+#line 371 "sintatica.y"
     {
-				(yyval) = arith((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), "/");
+				(yyval) = tratadoraArith((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), "/");
 			}
     break;
 
   case 26:
-#line 379 "sintatica.y"
+#line 375 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_BOOL;
 
-				atributos result = logic((yyvsp[(1) - (3)]).tipo, (yyvsp[(1) - (3)]).label, (yyvsp[(3) - (3)]).tipo, (yyvsp[(3) - (3)]).label, ">");
+				atributos result = tratadoraLogic((yyvsp[(1) - (3)]).tipo, (yyvsp[(1) - (3)]).label, (yyvsp[(3) - (3)]).tipo, (yyvsp[(3) - (3)]).label, ">");
 
 				(yyval).traducao = (yyvsp[(1) - (3)]).traducao + (yyvsp[(3) - (3)]).traducao + result.traducao;
 				(yyval).label = result.label;
@@ -1827,11 +1823,11 @@ yyreduce:
     break;
 
   case 27:
-#line 388 "sintatica.y"
+#line 384 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_BOOL;
 
-				atributos result = logic((yyvsp[(1) - (3)]).tipo, (yyvsp[(1) - (3)]).label, (yyvsp[(3) - (3)]).tipo, (yyvsp[(3) - (3)]).label, "<");
+				atributos result = tratadoraLogic((yyvsp[(1) - (3)]).tipo, (yyvsp[(1) - (3)]).label, (yyvsp[(3) - (3)]).tipo, (yyvsp[(3) - (3)]).label, "<");
 
 				(yyval).traducao = (yyvsp[(1) - (3)]).traducao + (yyvsp[(3) - (3)]).traducao + result.traducao;
 				(yyval).label = result.label;
@@ -1839,11 +1835,11 @@ yyreduce:
     break;
 
   case 28:
-#line 397 "sintatica.y"
+#line 393 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_BOOL;
 
-				atributos result = logic((yyvsp[(1) - (3)]).tipo, (yyvsp[(1) - (3)]).label, (yyvsp[(3) - (3)]).tipo, (yyvsp[(3) - (3)]).label, ">=");
+				atributos result = tratadoraLogic((yyvsp[(1) - (3)]).tipo, (yyvsp[(1) - (3)]).label, (yyvsp[(3) - (3)]).tipo, (yyvsp[(3) - (3)]).label, ">=");
 
 				(yyval).traducao = (yyvsp[(1) - (3)]).traducao + (yyvsp[(3) - (3)]).traducao + result.traducao;
 				(yyval).label = result.label;
@@ -1851,11 +1847,11 @@ yyreduce:
     break;
 
   case 29:
-#line 406 "sintatica.y"
+#line 402 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_BOOL;
 
-				atributos result = logic((yyvsp[(1) - (3)]).tipo, (yyvsp[(1) - (3)]).label, (yyvsp[(3) - (3)]).tipo, (yyvsp[(3) - (3)]).label, "<=");
+				atributos result = tratadoraLogic((yyvsp[(1) - (3)]).tipo, (yyvsp[(1) - (3)]).label, (yyvsp[(3) - (3)]).tipo, (yyvsp[(3) - (3)]).label, "<=");
 
 				(yyval).traducao = (yyvsp[(1) - (3)]).traducao + (yyvsp[(3) - (3)]).traducao + result.traducao;
 				(yyval).label = result.label;
@@ -1863,11 +1859,11 @@ yyreduce:
     break;
 
   case 30:
-#line 415 "sintatica.y"
+#line 411 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_BOOL;
 
-				atributos result = logic((yyvsp[(1) - (3)]).tipo, (yyvsp[(1) - (3)]).label, (yyvsp[(3) - (3)]).tipo, (yyvsp[(3) - (3)]).label, "==");
+				atributos result = tratadoraLogic((yyvsp[(1) - (3)]).tipo, (yyvsp[(1) - (3)]).label, (yyvsp[(3) - (3)]).tipo, (yyvsp[(3) - (3)]).label, "==");
 
 				(yyval).traducao = (yyvsp[(1) - (3)]).traducao + (yyvsp[(3) - (3)]).traducao + result.traducao;
 				(yyval).label = result.label;
@@ -1875,11 +1871,11 @@ yyreduce:
     break;
 
   case 31:
-#line 424 "sintatica.y"
+#line 420 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_BOOL;
 
-				atributos result = logic((yyvsp[(1) - (3)]).tipo, (yyvsp[(1) - (3)]).label, (yyvsp[(3) - (3)]).tipo, (yyvsp[(3) - (3)]).label, "!=");
+				atributos result = tratadoraLogic((yyvsp[(1) - (3)]).tipo, (yyvsp[(1) - (3)]).label, (yyvsp[(3) - (3)]).tipo, (yyvsp[(3) - (3)]).label, "!=");
 
 				(yyval).traducao = (yyvsp[(1) - (3)]).traducao + (yyvsp[(3) - (3)]).traducao + result.traducao;
 				(yyval).label = result.label;
@@ -1887,91 +1883,106 @@ yyreduce:
     break;
 
   case 32:
-#line 433 "sintatica.y"
+#line 429 "sintatica.y"
     {	
 				// bool ou tipo 
 				// $$.tipo = TK_TIPO_BOOL;
-				string nome = gerar_nomes_var();
+				string nome = geradoraDeNomeDeVariaveis();
 
-				// $$.traducao = $1.traducao + $3.traducao + "\t" + ;
+				(yyval).tipo = TK_TIPO_BOOL;
+				(yyval).tipo = tipoResult((yyvsp[(1) - (3)]).tipo, (yyvsp[(3) - (3)]).tipo);
 
+				variavel v = criadorDeVariavel(nome, nome, getTipoString((yyval).tipo), 0);
+
+				(yyval).traducao = (yyvsp[(1) - (3)]).traducao + (yyvsp[(3) - (3)]).traducao + "\t" + nome +" = "+ (yyvsp[(1) - (3)]).label +" && "+ (yyvsp[(3) - (3)]).label +";\n";
+				
 				(yyval).label = nome;
 			}
     break;
 
   case 33:
-#line 443 "sintatica.y"
+#line 444 "sintatica.y"
     {	
 				// bool ou tipo 
 				// $$.tipo = TK_TIPO_BOOL;
-				string nome = gerar_nomes_var();
+				string nome = geradoraDeNomeDeVariaveis();
 
-				// $$.traducao = $1.traducao + $3.traducao + "\t" + ;
+				(yyval).tipo = TK_TIPO_BOOL;
+				(yyval).tipo = tipoResult((yyvsp[(1) - (3)]).tipo, (yyvsp[(3) - (3)]).tipo);
+
+				variavel v = criadorDeVariavel(nome, nome, getTipoString((yyval).tipo), 0);
+
+				(yyval).traducao = (yyvsp[(1) - (3)]).traducao + (yyvsp[(3) - (3)]).traducao + "\t" + nome +" = "+ (yyvsp[(1) - (3)]).label +" || "+ (yyvsp[(3) - (3)]).label +";\n";
 
 				(yyval).label = nome;
 			}
     break;
 
   case 34:
-#line 453 "sintatica.y"
+#line 459 "sintatica.y"
     {	
 				// bool ou tipo 
 				// $$.tipo = TK_TIPO_BOOL;
-				string nome = gerar_nomes_var();
+				string nome = geradoraDeNomeDeVariaveis();
 
-				// $$.traducao = $3.traducao + "\t" + ;
+				(yyval).tipo = tipoResult((yyvsp[(2) - (2)]).tipo, (yyvsp[(2) - (2)]).tipo);
+
+				variavel v = criadorDeVariavel(nome, nome, getTipoString((yyval).tipo), 0);
+
+
+				(yyval).traducao = (yyvsp[(2) - (2)]).traducao + "\t" + nome +" = !"+ (yyvsp[(2) - (2)]).label +";\n";
 
 				(yyval).label = nome;
 			}
     break;
 
   case 35:
-#line 463 "sintatica.y"
+#line 474 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_INT;
 
-				string nome = gerar_nomes_var();
+				string nome = geradoraDeNomeDeVariaveis();
 				(yyval).traducao = "\t" + nome + " = " + (yyvsp[(1) - (1)]).label + ";\n";
 				(yyval).label = nome;
 
-				variavel v = criadorDeVariavel(nome, nome, get_var_tipo((yyval).tipo), 0);
+				variavel v = criadorDeVariavel(nome, nome, getTipoString((yyval).tipo), 0);
 
 			}
     break;
 
   case 36:
-#line 474 "sintatica.y"
+#line 485 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_FLOAT;
 
-				string nome = gerar_nomes_var();
+				string nome = geradoraDeNomeDeVariaveis();
 				(yyval).traducao = "\t" + nome + " = " + (yyvsp[(1) - (1)]).label + ";\n";
 				(yyval).label = nome;
 
-				variavel v = criadorDeVariavel(nome, nome, get_var_tipo((yyval).tipo), 0);
+				variavel v = criadorDeVariavel(nome, nome, getTipoString((yyval).tipo), 0);
 
 			}
     break;
 
   case 37:
-#line 485 "sintatica.y"
+#line 496 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_CHAR;
 
-				string nome = gerar_nomes_var();
+				string nome = geradoraDeNomeDeVariaveis();
 				(yyval).traducao = "\t" + nome + " = " + (yyvsp[(1) - (1)]).label + ";\n";
 				(yyval).label = nome;
 
-				variavel v = criadorDeVariavel(nome, nome, get_var_tipo((yyval).tipo), 0);
+				variavel v = criadorDeVariavel(nome, nome, getTipoString((yyval).tipo), 0);
 				// [to-do] checar isso $1.label.size() - 2
 
 			}
     break;
 
   case 38:
-#line 497 "sintatica.y"
+#line 508 "sintatica.y"
     {
-				variavel v = get_var((yyvsp[(1) - (1)]).label);
+				variavel v = getVarPorNome((yyvsp[(1) - (1)]).label);
 
 
 				// verifica se variavel existe
@@ -1983,7 +1994,7 @@ yyreduce:
 				else{
 					(yyval).traducao = (yyvsp[(1) - (1)]).traducao;
 					(yyval).label = v.temp_name;
-					(yyval).tipo = get_var_tipo_token(v.tipo);
+					(yyval).tipo = getTipoToken(v.tipo);
 				}
 
 				// cout << "TA AQUI" << endl;
@@ -1993,22 +2004,22 @@ yyreduce:
     break;
 
   case 39:
-#line 518 "sintatica.y"
+#line 529 "sintatica.y"
     {
 				(yyval).tipo = TK_TIPO_BOOL;
 
-				string nome = gerar_nomes_var();
+				string nome = geradoraDeNomeDeVariaveis();
 				(yyval).traducao = "\t" + nome + " = " + (yyvsp[(1) - (1)]).label + ";\n";
 				(yyval).label = nome;
 
-				variavel v = criadorDeVariavel(nome, nome, get_var_tipo((yyval).tipo), 0);
+				variavel v = criadorDeVariavel(nome, nome, getTipoString((yyval).tipo), 0);
 
 			}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 2012 "y.tab.c"
+#line 2023 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2222,7 +2233,7 @@ yyreturn:
 }
 
 
-#line 530 "sintatica.y"
+#line 541 "sintatica.y"
 
 
 #include "lex.yy.c"
@@ -2235,9 +2246,9 @@ int main( int argc, char* argv[] )
 
 	// for (int i = 0; i < varsDec.size(); ++i)
 	// {
-	// 	cout << " ->>>> " << get_var(varsDec[i].var_name).var_name << endl;
-	// 	cout << " ->>>> " << get_var(varsDec[i].var_name).temp_name << endl;
-	// 	cout << " ->>>> " << get_var(varsDec[i].var_name).tipo << "\n" << endl;
+	// 	cout << " ->>>> " << getVarPorNome(varsDec[i].var_name).var_name << endl;
+	// 	cout << " ->>>> " << getVarPorNome(varsDec[i].var_name).temp_name << endl;
+	// 	cout << " ->>>> " << getVarPorNome(varsDec[i].var_name).tipo << "\n" << endl;
 	// }
 
 	return 0;
@@ -2249,7 +2260,7 @@ void yyerror( string MSG )
 	exit (0);
 }
 
-string declararVars(){
+string exibirVarsDeclaradas(){
 	return getDeclaradas(varsDec);
 }
 variavel criadorDeVariavel(string nome, string temp_nome, string tipo, int tamanho){
@@ -2260,7 +2271,7 @@ variavel criadorDeVariavel(string nome, string temp_nome, string tipo, int taman
 	return v;
 }
 
-string gerar_nomes_var(){
+string geradoraDeNomeDeVariaveis(){
 	static int num_para_gerar_nomes = 0;
 	// string nome;
 	// nome = "temp_" + to_string(num_para_gerar_nomes);
@@ -2269,7 +2280,7 @@ string gerar_nomes_var(){
 	return "temp_" + to_string(num_para_gerar_nomes++);
 }
 
-int get_var_tipo_token(string tipo){
+int getTipoToken(string tipo){
 
 	if (tipo == "int")
 		return TK_TIPO_INT;
@@ -2285,7 +2296,7 @@ int get_var_tipo_token(string tipo){
 	return 0;
 }
 
-string get_var_tipo(int tipo){
+string getTipoString(int tipo){
 
 	if (tipo == TK_TIPO_INT)
 		return "int";
@@ -2301,15 +2312,15 @@ string get_var_tipo(int tipo){
 	return "";
 }
 
-atributos logic(int t1, string atr1_label, int t2, string atr2_label, string sinal){
+atributos tratadoraLogic(int t1, string atr1_label, int t2, string atr2_label, string sinal){
 
 	atributos retorno;
 	// o retorno de uma expressao logica deve ser bool
 	retorno.tipo = TK_TIPO_BOOL;
-	string nome = gerar_nomes_var();
+	string nome = geradoraDeNomeDeVariaveis();
 
 	// usando a mesma da arith, depois devo mudar pra uma tabela [to-do]
-	int tipo_das_entradas = typeOfArith(t1, t2);
+	int tipo_das_entradas = tipoResult(t1, t2);
 
 	if (tipo_das_entradas == TK_TIPO_INT)
 	{
@@ -2318,11 +2329,11 @@ atributos logic(int t1, string atr1_label, int t2, string atr2_label, string sin
 		retorno.traducao = "\t" + nome + " = " + atr1_label + " " + sinal + " " + atr2_label + ";\n";
 
 		// tipo da variavel deve ser do tipo int por ser um bool, ou deve ser o tipo da tipo_das_entradas? [to-do]
-		variavel v =  criadorDeVariavel(nome, nome, get_var_tipo(tipo_das_entradas), 0);
+		variavel v =  criadorDeVariavel(nome, nome, getTipoString(tipo_das_entradas), 0);
 	}
 	else if(tipo_das_entradas == TK_TIPO_FLOAT){
 
-		string nomeReal = gerar_nomes_var();
+		string nomeReal = geradoraDeNomeDeVariaveis();
 		
 		retorno.label = nomeReal;
 
@@ -2352,7 +2363,7 @@ atributos logic(int t1, string atr1_label, int t2, string atr2_label, string sin
 
 }
 
-int typeOfArith(int t1, int t2){
+int tipoResult(int t1, int t2){
 
 	// verificando com if, deveria ter uma tabela, fazer depois por demandar mais tempo
 
@@ -2373,14 +2384,14 @@ int typeOfArith(int t1, int t2){
 	}
 }
 
-atributos arith_com_cast(int tipo1, string atr1_label, int tipo2, string atr2_label, string sinal){
+atributos tratarArithComCast(int tipo1, string atr1_label, int tipo2, string atr2_label, string sinal){
 
-	int tipo_atual = typeOfArith(tipo1, tipo2);
+	int tipo_atual = tipoResult(tipo1, tipo2);
 
 	string line = "", line2 = "";
 
-	string nome = gerar_nomes_var();
-	string nomeReal = gerar_nomes_var();
+	string nome = geradoraDeNomeDeVariaveis();
+	string nomeReal = geradoraDeNomeDeVariaveis();
 
 	// devo castiar
 	if (tipo_atual == TK_TIPO_FLOAT)
@@ -2397,8 +2408,8 @@ atributos arith_com_cast(int tipo1, string atr1_label, int tipo2, string atr2_la
 			line2 = "\t" + nomeReal + " = " + atr1_label + " " + sinal + " " + nome + ";\n";
 		}
 
-		variavel v = criadorDeVariavel(nome, nome, get_var_tipo(tipo_atual), 0);
-		v = criadorDeVariavel(nomeReal, nomeReal, get_var_tipo(tipo_atual), 0);
+		variavel v = criadorDeVariavel(nome, nome, getTipoString(tipo_atual), 0);
+		v = criadorDeVariavel(nomeReal, nomeReal, getTipoString(tipo_atual), 0);
 
 	}
 
@@ -2409,28 +2420,28 @@ atributos arith_com_cast(int tipo1, string atr1_label, int tipo2, string atr2_la
 
 }
 
-atributos arith(atributos a1, atributos a2, string sinal){
+atributos tratadoraArith(atributos a1, atributos a2, string sinal){
 	
 	atributos retorno;
-	retorno.tipo = typeOfArith(a1.tipo, a2.tipo);
+	retorno.tipo = tipoResult(a1.tipo, a2.tipo);
 	
 
 	// sem precisar cast
 	if (a1.tipo == a2.tipo)
 	{
-		string nome = gerar_nomes_var();
+		string nome = geradoraDeNomeDeVariaveis();
 		
 		retorno.traducao = a1.traducao + a2.traducao + "\t" + nome + " = " + a1.label + " " + sinal + " " + a2.label + ";\n";
 	
 		retorno.label = nome;
 
-		variavel v = criadorDeVariavel(nome, nome, get_var_tipo(retorno.tipo), 0);
+		variavel v = criadorDeVariavel(nome, nome, getTipoString(retorno.tipo), 0);
 
 	}
 	else{ // CASTando
 
 		// fazer o cast dependendo do tipo
-		atributos atr = arith_com_cast(a1.tipo, a1.label, a2.tipo, a2.label, sinal);
+		atributos atr = tratarArithComCast(a1.tipo, a1.label, a2.tipo, a2.label, sinal);
 		atr.tipo = retorno.tipo;
 
 		retorno.traducao = a1.traducao + a2.traducao + atr.traducao;
@@ -2443,7 +2454,7 @@ atributos arith(atributos a1, atributos a2, string sinal){
 }	
 
 
-variavel get_var(string name){
+variavel getVarPorNome(string name){
 
 	// quando for blocos devo procurar no vetor
 
