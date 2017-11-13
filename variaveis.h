@@ -24,27 +24,27 @@ typedef map <string, variavel> Var_table;
 
 typedef struct maps
 {
-	vector< Var_table > v;
+	vector< Var_table > variaveis_map;
 	int escopo_num;
 } maps;
 
 void pushEsc(maps *tack, Var_table mapEsc){
 
-	tack->v.push_back(mapEsc);
+	tack->variaveis_map.push_back(mapEsc);
 	tack->escopo_num += 1; // somando um pra indicar que adicionei e fui pro proximo escopo, 0 = global
 
 }
 
 Var_table popEsc(maps *tack)
 {
-	if(tack->v.empty()){
+	if(tack->variaveis_map.empty()){
 		cout << "Sem escopo pra remover :(" <<endl;
 		exit(0);
 	}
 
 	// se tiver o que remover
-	Var_table esc = tack->v.back();
-	tack->v.pop_back();
+	Var_table esc = tack->variaveis_map.back();
+	tack->variaveis_map.pop_back();
 	tack->escopo_num -= 1;
 
 	return esc;
@@ -76,12 +76,12 @@ maps* criarMaps(){
 
 void addVarEsc(maps *tack, variavel var){
 
-	tack->v[tack->escopo_num][var.var_name] = var;
+	tack->variaveis_map[tack->escopo_num][var.var_name] = var;
 }
 
 void addVarEscGlobal(maps *tack, variavel var){
 
-	tack->v[0][var.var_name] = var;
+	tack->variaveis_map[0][var.var_name] = var;
 }
 
 typedef std::vector<variavel> varsDeclaradas;
@@ -101,11 +101,11 @@ string getDeclaradas(varsDeclaradas vars){
 	{
 		variavel v = vars[i];
 
-		// if (v.tipo == "string")
-		// {
-		// 	line += "char* " + v.temp_name + " = (char*) malloc(sizeof(char) * " + to_string(v.tamanho) + " ); \n";
-		// 	i_string = 1;
-		// }
+		if (v.tipo == "string")
+		{
+			line += "char* " + v.temp_name + " = (char*) malloc(sizeof(char) * " + to_string(v.tamanho) + " ); \n";
+			i_string = 1;
+		}
 		if(v.tipo == "int"){
 		
 			line_int += " " + v.temp_name + ",";

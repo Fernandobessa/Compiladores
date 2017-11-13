@@ -56,6 +56,28 @@ STRING	\"[^\"]*\"
 
 "not"       { return TK_NOT; }
 
+"if"		{ return TK_IF; }
+
+"else"		{ return TK_ELSE; }
+
+"do" 		{ return TK_DO; }
+
+"while" 	{ return TK_WHILE; }
+
+"for" 		{ return TK_FOR; }
+
+"break"		{ return TK_BREAK; }
+
+"continue"	{ return TK_CONTINUE; }
+
+
+"cout"		{ return TK_PRINT; }
+
+"cin"		{ return TK_READ; }
+
+
+
+
 "true"		{ yylval.label = yytext; return TK_BOOL; }
 
 "false"		{ yylval.label = yytext; return TK_BOOL; }
@@ -64,6 +86,8 @@ STRING	\"[^\"]*\"
 {REAL}		{ yylval.label = yytext; return TK_REAL;}
 {ID}		{ yylval.label = yytext; return TK_ID; }
 {CHAR}	{ yylval.label = yytext; return TK_CHAR; }
+{STRING}    { yylval.label = yytext; return TK_STRING; }
+
 
 .			{ *yytext; }
 

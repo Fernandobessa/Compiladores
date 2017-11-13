@@ -14,10 +14,15 @@ struct atributos
 	string label;
 	string traducao;
 	int tipo;
+
+	int tamanho;
 };
 
 // Variaveis Planistas
 string error_msg = "Wubba Lubba Dub Dub";
+
+// roubando pra fazer else if, gambiarra demais
+string else_if_string = "";
 
 maps* tack = criarMaps();
 varsDeclaradas varsDec;
@@ -27,20 +32,26 @@ int yylex(void);
 void yyerror(string);
 string exibirVarsDeclaradas();
 variavel criadorDeVariavel(string, string, string, int);
+void deletadorDeVariavel(string);
 string geradoraDeNomeDeVariaveis();
 int getTipoToken(string);
 string getTipoString(int);
 atributos tratadoraLogic(int, string, int, string, string);
 atributos tratarArithComCast(int, string, int, string, string);
+atributos concatenarStrings(atributos, atributos);
 int tipoResult(int, int);
 atributos tratadoraArith(atributos, atributos, string);
 variavel getVarPorNome(string);
+string geradorTextGoto(int);
 %}
 
-%token TK_NUM TK_REAL TK_CHAR TK_BOOL
+%token TK_NUM TK_REAL TK_CHAR TK_BOOL TK_STRING
 %token TK_MAIN TK_ID TK_TIPO_VAR TK_TIPO_INT TK_TIPO_FLOAT TK_TIPO_CHAR TK_TIPO_BOOL TK_TIPO_STRING
 %token TK_EQUAL TK_GTE TK_LTE TK_NEQUAL
 %token TK_AND TK_OR TK_NOT
+%token TK_IF TK_ELSE
+%token TK_DO TK_WHILE TK_FOR TK_BREAK TK_CONTINUE
+%token TK_PRINT TK_READ
 %token TK_FIM TK_ERROR
 
 // ordem das operacoes?! bottom -> up	
@@ -53,19 +64,49 @@ variavel getVarPorNome(string);
 
 S 			: TK_TIPO_INT TK_MAIN '(' ')' BLOCO
 			{
-				cout << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\n" << exibirVarsDeclaradas() << "\nint main(void)\n{\n" << $5.traducao << "\treturn 0;\n}" << endl; 
+				cout << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\n" << exibirVarsDeclaradas()  << "\nint main(void)\n{\n" << else_if_string << $5.traducao << "\treturn 0;\n}" << endl; 
 			}
 			;
 
-BLOCO		: '{' COMANDOS '}'
+BLOCO		: PUSH_SCOPE '{' COMANDOS '}' POP_SCOPE
 			{
-				$$.traducao = $2.traducao;
+				$$.traducao = $3.traducao;
+				$$.tamanho = $3.tamanho;
+
+				cout << "taamnaho aqui 33" << endl;
+				cout << $$.tamanho << endl;
+			}
+			;
+
+PUSH_SCOPE: {
+				Var_table escopo;
+				pushEsc(tack,escopo);
+				
+				$$.traducao = "";
+				$$.label = "";
+			}
+			;
+POP_SCOPE:	{
+				popEsc(tack);
+				
+				$$.traducao = "";
+				$$.label = "";
 			}
 			;
 
 COMANDOS	: COMANDO COMANDOS
 			{
+
+				cout << "taamnaho aqui 22" << endl;
+				cout << $$.tamanho << endl;
+
 				$$.traducao = $1.traducao + $2.traducao;
+
+				$$.tamanho = $1.tamanho;
+
+
+
+
 			}
 			| // vazio
 			{
@@ -73,7 +114,67 @@ COMANDOS	: COMANDO COMANDOS
 			}
 			;
 
-COMANDO 	: DECLARATION ';'
+COMANDO 	: TK_IF '(' E ')' BLOCO
+			{
+
+				int tipo_atual = tipoResult($3.tipo, $3.tipo);
+
+				// IF aceita bool e int
+				if (tipo_atual != TK_TIPO_BOOL && tipo_atual != TK_TIPO_INT )
+				{
+					cout << "nao aceita esse tipo no if" << endl;
+					exit(0);
+				}
+
+				string nome = geradoraDeNomeDeVariaveis();
+				variavel v = criadorDeVariavel(nome, nome, getTipoString(tipo_atual), $3.tamanho);
+				string gotoText = geradorTextGoto(TK_IF); //$1.tipo
+
+				string line = $3.traducao; 
+				line += "\t" +nome+ " = !" +$3.label+ ";\n";
+
+				$$.traducao = line + "\tif(" +nome+ ") goto " +gotoText+ ";\n";
+				$$.traducao += $5.traducao+ "\n";
+				$$.traducao += "\t" +gotoText+ ":\n";
+
+			} 
+			| TK_IF '(' E ')' BLOCO ELSE
+			{
+				int tipo_atual = tipoResult($3.tipo, $3.tipo);
+
+				// IF aceita bool e int
+				if (tipo_atual != TK_TIPO_BOOL && tipo_atual != TK_TIPO_INT )
+				{
+					cout << "nao aceita esse tipo no if" << endl;
+					exit(0);
+				}
+
+				string nome = geradoraDeNomeDeVariaveis();
+				variavel v = criadorDeVariavel(nome, nome, getTipoString(tipo_atual), $3.tamanho);
+				string gotoText_ir_para_else = geradorTextGoto(TK_IF); //$1.tipo
+
+				string line = $3.traducao;
+				line += "\t" +nome+ " = !" +$3.label+ ";\n";
+
+
+				// $$.traducao = line + "\tif(" +$3.label+ "){\n" +$5.traducao+ "\t}\n";
+				// $$.traducao += $6.traducao;
+
+				$$.traducao = line + "\tif(" +nome+ ") goto " +gotoText_ir_para_else+ ";\n";
+				$$.traducao += $5.traducao+ "\n";
+				$$.traducao += "\tgoto " +$6.label+ ";\n";
+				$$.traducao += "\t" +gotoText_ir_para_else+ ":\n";
+				$$.traducao += $6.traducao;
+
+
+				
+
+			}
+			| LOOP
+			{
+				$$.traducao = $1.traducao;
+			}
+			| DECLARATION ';'
 			{
 				$$ = $1;
 
@@ -83,13 +184,262 @@ COMANDO 	: DECLARATION ';'
 			{
 				$$ = $1;
 			}
+			| PRINT ';'
+			{
+				$$ = $1;
+
+			}
+			| READ ';'
+			{
+				$$ = $1;
+
+			}
+			| TK_BREAK ';'
+			{
+				$$.traducao = "\tbreak;\n";
+			}
+			| TK_CONTINUE ';'
+			{
+				$$.traducao = "\tcontinue;\n";
+
+			}
+
 			// | E ';'
 			;
+ELSE 		: TK_ELSE BLOCO
+			{
+				string gotoText_final_if = geradorTextGoto(TK_IF); // ou $1.tipo e mudar a func
+
+				$$.traducao += $2.traducao+ "\n";
+				$$.traducao += "\t" +gotoText_final_if+ ":\n";
+
+				$$.label = gotoText_final_if;
+
+
+			}
+			| TK_ELSE TK_IF '(' E ')' BLOCO
+			{
+
+				int tipo_atual = tipoResult($4.tipo, $4.tipo);
+
+				// IF aceita bool e int
+				if (tipo_atual != TK_TIPO_BOOL && tipo_atual != TK_TIPO_INT )
+				{
+					cout << "nao aceita esse tipo no if" << endl;
+					exit(0);
+				}
+
+				string nome = geradoraDeNomeDeVariaveis();
+				variavel v = criadorDeVariavel(nome, nome, getTipoString(tipo_atual), $4.tamanho);
+				string gotoText_final_if = geradorTextGoto(TK_IF); //$1.tipo
+
+				string line = $4.traducao; 
+				line += "\t" +nome+ " = !" +$4.label+ ";\n";
+
+				$$.traducao = line + "\tif(" +nome+ ") goto " +gotoText_final_if+ ";\n";
+				$$.traducao += $6.traducao+ "\n";
+				$$.traducao += "\t" +gotoText_final_if+ ":\n";
+
+
+				$$.label = gotoText_final_if;
+
+
+				// // string line = $4.traducao;
+				// else_if_string += $4.traducao;
+				// // deletadorDeVariavel($4.label);
+
+
+				// $$.traducao = "\telse if(" +$4.label+ "){\n" +$6.traducao+ "\t}\n";
+
+			} 
+			| TK_ELSE TK_IF '(' E ')' BLOCO ELSE
+			{
+				int tipo_atual = tipoResult($4.tipo, $4.tipo);
+
+				// IF aceita bool e int
+				if (tipo_atual != TK_TIPO_BOOL && tipo_atual != TK_TIPO_INT )
+				{
+					cout << "nao aceita esse tipo no if" << endl;
+					exit(0);
+				}
+
+				string nome = geradoraDeNomeDeVariaveis();
+				variavel v = criadorDeVariavel(nome, nome, getTipoString(tipo_atual), $4.tamanho);
+				string gotoText_ir_para_else = geradorTextGoto(TK_IF); //$1.tipo
+
+				string line = $4.traducao;
+				line += "\t" +nome+ " = !" +$4.label+ ";\n";
+
+				$$.traducao = line + "\tif(" +nome+ ") goto " +gotoText_ir_para_else+ ";\n";
+				$$.traducao += $6.traducao+ "\n";
+				$$.traducao += "\tgoto " +$7.label+ ";\n";
+				$$.traducao += "\t" +gotoText_ir_para_else+ ":\n";
+				$$.traducao += $7.traducao;
+
+				$$.label = $7.label;
+
+
+				// else_if_string += $4.traducao;
+				// // deletadorDeVariavel($4.label);
+
+
+
+				// $$.traducao = "\telse if(" +$4.label+ "){\n" +$6.traducao+ "\t}\n";
+				// $$.traducao += $7.traducao;
+			}
+			;
+
+LOOP		: DO
+			{
+				$$ = $1;
+			}
+			| WHILE
+			{
+				$$ = $1;
+			}
+			| FOR
+			{
+				$$ = $1;
+			}
+			;
+DO 			: TK_DO BLOCO TK_WHILE '(' E ')' ';'
+			{
+				int tipo_atual = tipoResult($5.tipo, $5.tipo);
+
+				if (tipo_atual != TK_TIPO_BOOL && tipo_atual != TK_TIPO_INT)
+				{
+					cout << "nao aceita esse tipo no while" << endl;
+					exit(0);
+				}
+
+				// string nome = geradoraDeNomeDeVariaveis();
+
+				else_if_string += $5.traducao;
+
+				$$.traducao = "\tdo{\n" +$2.traducao+ "\t}\n\twhile(" +$5.label+ ")\n";
+				// $$.traducao = "\tdo{\n" +$2.traducao+ "\t}\n\twhile(" +$5.label+ ");\n";
+				// $$.traducao = "\twhile(" +$5.label+ "){\n" +$5.traducao+ "\t}\n";
+			}
+			;
+WHILE 		: TK_WHILE '(' E ')' BLOCO
+			{
+				int tipo_atual = tipoResult($3.tipo, $3.tipo);
+
+				if (tipo_atual != TK_TIPO_BOOL && tipo_atual != TK_TIPO_INT)
+				{
+					cout << "nao aceita esse tipo no while" << endl;
+					exit(0);
+				}
+				string nome = geradoraDeNomeDeVariaveis();
+				variavel v = criadorDeVariavel(nome, nome, getTipoString(tipo_atual), $3.tamanho);
+				string gotoText_final_if = geradorTextGoto(TK_IF); //$1.tipo
+
+				string line = $3.traducao; 
+				line += "\t" +nome+ " = !" +$3.label+ ";\n";
+
+				$$.traducao = line + "\tif(" +nome+ ") goto " +gotoText_final_if+ ";\n";
+				$$.traducao += $5.traducao+ "\n";
+				$$.traducao += "\t" +gotoText_final_if+ ":\n";
+
+
+				$$.label = gotoText_final_if;
+
+
+				// else_if_string += $3.traducao;
+
+				// $$.traducao = "\twhile(" +$3.label+ "){\n" +$5.traducao+ "\t}\n";
+
+
+
+
+
+			}
+			;
+FOR 		: TK_FOR '(' DECLARATION ';' E ';' ATRIB ')' BLOCO
+			{
+
+				int tipo_atual = tipoResult($3.tipo, $3.tipo);
+
+				if (tipo_atual != TK_TIPO_INT)
+				{
+					cout << "nao aceita esse tipo no for" << endl;
+					exit(0);
+				}
+
+				else_if_string += $3.traducao;
+
+				$$.traducao = "\tfor(" +$3.label+ " ; " +$5.label+ ";" +$7.label+ "){\n" +$9.traducao+ "\t}\n";
+
+
+				cout << $3.label <<endl;
+
+
+
+			}
+			;
+PRINT 		: TK_PRINT PRINT_THINGS
+			{
+
+				$$.traducao = "\tstd::cout << " +$2.traducao+ "std::endl;\n";
+
+				// cout << "DSADSADSA<" << endl;
+
+			}
+			;
+PRINT_THINGS: PRINT_THINGS ',' PRINT_THING
+			{
+				$$.traducao = $1.traducao + $3.traducao;
+			}
+			| PRINT_THING
+			{
+				$$.traducao = $1.traducao;
+			}
+			;
+PRINT_THING: E
+			{
+				else_if_string += $1.traducao;
+				// deletadorDeVariavel($1.label);
+				$$.traducao = $1.label + " << ";
+
+			}
+			;
+
+READ 		: TK_READ READ_THINGS
+			{
+
+				$$.traducao = "\tstd::cin " +$2.traducao+ ";\n";
+
+				// cout << "DSADSADSA<" << endl;
+
+			}
+			;
+READ_THINGS: READ_THINGS ',' READ_THING
+			{
+				$$.traducao = $1.traducao + $3.traducao;
+			}
+			| READ_THING
+			{
+				$$.traducao = $1.traducao;
+			}
+			;
+READ_THING: TK_ID
+			{
+				else_if_string += $1.traducao;
+				// deletadorDeVariavel($1.label);
+				$$.traducao = " >> " +$1.label;
+
+			}
+			;
+
 
 DECLARATION	: TIPO VARLIST
 			{
 				$2.tipo = $1.tipo;
 				$$.traducao = $1.traducao + $2.traducao;
+
+				$$.tamanho = $2.tamanho;
+
+
 
 				// cout << "AQUIII ________ \n" << "Label: " << $$.label << "\nTrad: " << $$.traducao << "\n ACABOUU ---" <<endl; 
 
@@ -138,9 +488,9 @@ VARLIST 	: VARLIST ',' TK_ID
 				variavel v = criadorDeVariavel($3.label, nome, getTipoString($0.tipo), 0);
 				// addVarEsc(tack, v);
 
-				// cout << " ->>>> " << tack->v[0][$3.label].var_name << endl;
-				// cout << " ->>>> " << tack->v[0][$3.label].temp_name << endl;
-				// cout << " ->>>> " << tack->v[0][$3.label].tipo << endl;
+				// cout << " ->>>> " << tack->variaveis_map[0][$3.label].var_name << endl;
+				// cout << " ->>>> " << tack->variaveis_map[0][$3.label].temp_name << endl;
+				// cout << " ->>>> " << tack->variaveis_map[0][$3.label].tipo << endl;
 
 			}
 			| VARLIST ',' ATRIB
@@ -183,17 +533,29 @@ VARLIST 	: VARLIST ',' TK_ID
 				if ($3.tipo == TK_TIPO_BOOL && tipo_v != "bool")
 				{
 					cout << error_msg << endl;
+					cout << "tipo de expressao = bool e tipo variavel != bool" << endl;
 					exit(0);
 				}
 
+				// if (tipo_v == "string")
+				// {
+					// cout << "é igual string" << endl;
+					// cout << $3.label << endl;
+					// cout << $3.tamanho << endl;
+				// }
 
-				variavel v = criadorDeVariavel($1.label, nome, tipo_v, 0);
+
+				variavel v = criadorDeVariavel($1.label, nome, tipo_v, $3.tamanho);
+				$$.tamanho = $3.tamanho;
+
+				cout << "Tamanhoa aqui" << endl;
+				cout << $$.tamanho << endl;
 
 				// addVarEsc(tack, v);
 
-				// cout << " ->>>> " << tack->v[0][$1.label].var_name << endl;
-				// cout << " ->>>> " << tack->v[0][$1.label].temp_name << endl;
-				// cout << " ->>>> " << tack->v[0][$1.label].tipo << endl;
+				// cout << " ->>>> " << tack->variaveis_map[0][$1.label].var_name << endl;
+				// cout << " ->>>> " << tack->variaveis_map[0][$1.label].temp_name << endl;
+				// cout << " ->>>> " << tack->variaveis_map[0][$1.label].tipo << endl;
 
 				// cout << " ->>>> " << getTipoString($3.tipo) << endl;
 
@@ -238,11 +600,11 @@ VARLIST 	: VARLIST ',' TK_ID
 
 				// addVarEsc(tack, v);
 
-				// for (int i = 0; i < tack->v.size(); ++i)
+				// for (int i = 0; i < tack->variaveis_map.size(); ++i)
 				// {
-					// cout << " ->>>> " << tack->v[0][$$.label].var_name << endl;
-					// cout << " ->>>> " << tack->v[0][$$.label].temp_name << endl;
-					// cout << " ->>>> " << tack->v[0][$$.label].tipo << endl;
+					// cout << " ->>>> " << tack->variaveis_map[0][$$.label].var_name << endl;
+					// cout << " ->>>> " << tack->variaveis_map[0][$$.label].temp_name << endl;
+					// cout << " ->>>> " << tack->variaveis_map[0][$$.label].tipo << endl;
 					 
 				// }
 
@@ -253,6 +615,9 @@ ATRIB 		: TK_ID '=' E
 			{
 				variavel v = getVarPorNome($1.label);
 				string nome = v.temp_name;
+
+				$$.tamanho = $3.tamanho;
+
 
 				// variavel nao existe
 				if (nome == "")
@@ -284,10 +649,13 @@ ATRIB 		: TK_ID '=' E
 					if ($3.tipo == TK_TIPO_BOOL && tipo_v != "bool")
 					{
 						cout << error_msg << endl;
+						cout << "tipo de expressao = bool e tipo variavel != bool" << endl;
+
 						exit(0);
 					}
 
-					v = criadorDeVariavel($1.label, nome, tipo_v, 0);
+					v = criadorDeVariavel($1.label, nome, tipo_v, $3.tamanho);
+
 
 
 
@@ -302,6 +670,8 @@ ATRIB 		: TK_ID '=' E
 					if ($3.tipo == TK_TIPO_BOOL && v.tipo != "bool")
 					{
 						cout << error_msg << endl;
+						cout << "tipo de expressao = bool e tipo variavel != bool" << endl;
+
 						exit(0);
 					}
 				}
@@ -361,7 +731,16 @@ E 			: '(' E ')'
 			}
 			| E '+' E
 			{
-				$$ = tratadoraArith($1, $3, "+");
+				if ($1.tipo == TK_TIPO_STRING && $3.tipo == TK_TIPO_STRING)
+				{
+					cout << "TAAAAMMAMAMA" << endl;
+					cout << $1.tamanho << endl;
+					cout << $3.tamanho << endl;
+					$$ = concatenarStrings($1, $3);
+				}
+				else{
+					$$ = tratadoraArith($1, $3, "+");
+				}
 			}
 			| E '*' E
 			{
@@ -508,11 +887,14 @@ E 			: '(' E ')'
 			{
 				variavel v = getVarPorNome($1.label);
 
+				$$.tamanho = v.tamanho;
+
 
 				// verifica se variavel existe
 				if (v.var_name == "")
 				{
 					cout << error_msg << endl;
+					cout << "variavel nao existe" << endl;
 					exit(0);
 				}
 				else{
@@ -522,7 +904,8 @@ E 			: '(' E ')'
 				}
 
 				// cout << "TA AQUI" << endl;
-				// cout << v.var_name << endl;
+				// cout << $$.label << endl;
+				// cout << $$.tipo << endl;
 
 			}
 			| TK_BOOL
@@ -534,6 +917,19 @@ E 			: '(' E ')'
 				$$.label = nome;
 
 				variavel v = criadorDeVariavel(nome, nome, getTipoString($$.tipo), 0);
+
+			}
+			| TK_STRING
+			{
+				$$.tipo = TK_TIPO_STRING;
+
+				string nome = geradoraDeNomeDeVariaveis();
+				$$.traducao = "\tstrcpy(" + nome + "," + $1.label + ");\n";
+				$$.label = nome;
+
+				$$.tamanho = $1.label.size()-2;
+
+				variavel v = criadorDeVariavel(nome, nome, getTipoString($$.tipo), $1.label.size()-2);
 
 			}
 			;
@@ -565,16 +961,59 @@ void yyerror( string MSG )
 }
 
 string exibirVarsDeclaradas(){
+
+	// varsDeclaradas varsDec_aux;
+
+	// for (int i = 0; i < varsDec.size(); ++i)
+	// {
+	// 	variavel v = getVarPorNome(varsDec[i].var_name);
+
+	// 	cout << "VAAAA " << varsDec[i].var_name << endl;
+	// 	if ( varsDec.count(v.var_name) )
+	// 	{
+	// 		cout << "VBBBB " << v.var_name << endl;
+		
+	// 	}
+
+	// 	varsDec_aux.push_back(v);
+	// 	cout << "VCCCC " << varsDec_aux[i].var_name << endl;
+
+	// }
+
 	return getDeclaradas(varsDec);
 }
 variavel criadorDeVariavel(string nome, string temp_nome, string tipo, int tamanho){
-	variavel v = criarVar(nome, temp_nome, tipo, tamanho);
+
+	variavel v;
+
+	if (tipo == "string" && tamanho == 0)
+	{
+		// criando sting com tamanho predeterminado, deve melhorar [to-do]
+		v = criarVar(nome, temp_nome, tipo, 0);
+		
+	}else{
+		v = criarVar(nome, temp_nome, tipo, tamanho);
+	}
+
 	addVarEsc(tack, v);
 	varsDec.push_back(v);
 
 	return v;
 }
+ 
+void deletadorDeVariavel(string nome){
 
+	tack->variaveis_map[tack->escopo_num].erase(nome);
+	cout << "APAGOU " << nome << endl;
+
+	exibirVarsDeclaradas();
+
+	// variavel v = getVarPorNome(nome);
+	// cout << v.var_name << endl;
+	// variavel v = getVarPorNome(nome);
+	// delete v;
+
+}
 string geradoraDeNomeDeVariaveis(){
 	static int num_para_gerar_nomes = 0;
 	// string nome;
@@ -594,8 +1033,8 @@ int getTipoToken(string tipo){
 		return TK_TIPO_CHAR;
 	if (tipo == "bool")
 		return TK_TIPO_BOOL;
-	// if (tipo == "string")
-	// 	return TK_TIPO_STRING;
+	if (tipo == "string")
+		return TK_TIPO_STRING;
 
 	return 0;
 }
@@ -610,8 +1049,8 @@ string getTipoString(int tipo){
 		return "char";
 	if (tipo == TK_TIPO_BOOL)
 		return "bool";
-	// if (tipo == TK_TIPO_STRING)
-	// 	return "string";
+	if (tipo == TK_TIPO_STRING)
+		return "string";
 
 	return "";
 }
@@ -673,8 +1112,22 @@ int tipoResult(int t1, int t2){
 
 	if ( (t1 != TK_TIPO_FLOAT && t1 != TK_TIPO_INT) || (t2 != TK_TIPO_FLOAT && t2 != TK_TIPO_INT) )
 	{
+
+		if (t1 == TK_TIPO_CHAR && t2 == TK_TIPO_CHAR)
+		{
+			return TK_TIPO_CHAR;
+		}
+		else if (t1 == TK_TIPO_BOOL && t2 == TK_TIPO_BOOL)
+		{
+			return TK_TIPO_BOOL;
+		}
+		else if (t1 == TK_TIPO_STRING && t2 == TK_TIPO_STRING)
+		{
+			return TK_TIPO_STRING;
+		}
 		// tipo de operadores invalidos
 		cout << error_msg << endl;
+		cout << "tipo de operadores invalidos" << endl;
 		exit(0);
 
 	}
@@ -727,6 +1180,10 @@ atributos tratarArithComCast(int tipo1, string atr1_label, int tipo2, string atr
 atributos tratadoraArith(atributos a1, atributos a2, string sinal){
 	
 	atributos retorno;
+	cout << "tipo" << endl;
+	cout << a1.tipo << endl;
+	cout << a2.tipo << endl;
+	cout << a1.label << endl;
 	retorno.tipo = tipoResult(a1.tipo, a2.tipo);
 	
 
@@ -757,14 +1214,86 @@ atributos tratadoraArith(atributos a1, atributos a2, string sinal){
 	return retorno;
 }	
 
+atributos concatenarStrings(atributos a1, atributos a2){
+
+	string nome = geradoraDeNomeDeVariaveis();
+
+	variavel v1 = getVarPorNome(a1.label);
+	variavel v2 = getVarPorNome(a2.label);
+	
+	variavel v = criadorDeVariavel(nome, nome, getTipoString(TK_TIPO_STRING), (a1.tamanho + a2.tamanho));
+
+	cout << "nome" << endl;
+	cout << nome << endl;
+	cout << a1.tamanho << endl;
+	cout << a2.tamanho << endl;
+	cout << v.tamanho << endl;
+
+	string l1 = "\tstrcat(" +nome+ ", " +a1.label+ ");\n";
+	string l2 = "\tstrcat(" +nome+ ", " +a2.label+ ");\n";
+
+	atributos atr;
+	atr.label = nome;
+	atr.traducao = l1 + l2;
+	atr.tipo = TK_TIPO_STRING;
+	atr.tamanho = (a1.tamanho + a2.tamanho);
+
+	cout << "nome" << endl;
+
+	return atr;
+
+}
+
 
 variavel getVarPorNome(string name){
 
 	// quando for blocos devo procurar no vetor
 
-	return tack->v[tack->escopo_num][name];
+	Var_table vt = tack->variaveis_map[tack->escopo_num];
+
+	// variavel ja declarada
+	if ( vt.count(name) )
+	{
+		// cout << "achou " << name <<endl;
+		return vt[name];
+	}
+	else {
+		int esc = tack->escopo_num-1;
+		// cout << "esc " << esc << endl;
+		for (int i = esc; i > -1; i--)
+		{
+			Var_table vt = tack->variaveis_map[i];
+
+			if ( vt.count(name) )
+			{
+				// cout << "achou " << name <<endl;
+
+				return vt[name];
+			}
+		} 
+	}
+	// cout << "_______ " << tack->variaveis_map[tack->escopo_num][name].var_name << endl;
+	// return criarVar("", "", "",  0);
+	// return tack->variaveis_map[tack->escopo_num][name];
+
+	cout << "Essa variavel nao 'existe'" << endl;
+	return vt[0];
 }
 
+string geradorTextGoto(int token){
+	static int num_label = 0;
+	
+	if (token == TK_IF)
+	{
+		return "token_if_" + to_string(num_label++);
+	}
+	else if (token == TK_FOR)
+	{
+		return "token_for_" +to_string(num_label++);
+	}
+
+	return "ISSo nao deveria estar retornando 1 ";
+}
 
 
 

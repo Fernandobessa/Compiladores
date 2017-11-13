@@ -43,23 +43,33 @@
      TK_REAL = 259,
      TK_CHAR = 260,
      TK_BOOL = 261,
-     TK_MAIN = 262,
-     TK_ID = 263,
-     TK_TIPO_VAR = 264,
-     TK_TIPO_INT = 265,
-     TK_TIPO_FLOAT = 266,
-     TK_TIPO_CHAR = 267,
-     TK_TIPO_BOOL = 268,
-     TK_TIPO_STRING = 269,
-     TK_EQUAL = 270,
-     TK_GTE = 271,
-     TK_LTE = 272,
-     TK_NEQUAL = 273,
-     TK_AND = 274,
-     TK_OR = 275,
-     TK_NOT = 276,
-     TK_FIM = 277,
-     TK_ERROR = 278
+     TK_STRING = 262,
+     TK_MAIN = 263,
+     TK_ID = 264,
+     TK_TIPO_VAR = 265,
+     TK_TIPO_INT = 266,
+     TK_TIPO_FLOAT = 267,
+     TK_TIPO_CHAR = 268,
+     TK_TIPO_BOOL = 269,
+     TK_TIPO_STRING = 270,
+     TK_EQUAL = 271,
+     TK_GTE = 272,
+     TK_LTE = 273,
+     TK_NEQUAL = 274,
+     TK_AND = 275,
+     TK_OR = 276,
+     TK_NOT = 277,
+     TK_IF = 278,
+     TK_ELSE = 279,
+     TK_DO = 280,
+     TK_WHILE = 281,
+     TK_FOR = 282,
+     TK_BREAK = 283,
+     TK_CONTINUE = 284,
+     TK_PRINT = 285,
+     TK_READ = 286,
+     TK_FIM = 287,
+     TK_ERROR = 288
    };
 #endif
 /* Tokens.  */
@@ -67,23 +77,33 @@
 #define TK_REAL 259
 #define TK_CHAR 260
 #define TK_BOOL 261
-#define TK_MAIN 262
-#define TK_ID 263
-#define TK_TIPO_VAR 264
-#define TK_TIPO_INT 265
-#define TK_TIPO_FLOAT 266
-#define TK_TIPO_CHAR 267
-#define TK_TIPO_BOOL 268
-#define TK_TIPO_STRING 269
-#define TK_EQUAL 270
-#define TK_GTE 271
-#define TK_LTE 272
-#define TK_NEQUAL 273
-#define TK_AND 274
-#define TK_OR 275
-#define TK_NOT 276
-#define TK_FIM 277
-#define TK_ERROR 278
+#define TK_STRING 262
+#define TK_MAIN 263
+#define TK_ID 264
+#define TK_TIPO_VAR 265
+#define TK_TIPO_INT 266
+#define TK_TIPO_FLOAT 267
+#define TK_TIPO_CHAR 268
+#define TK_TIPO_BOOL 269
+#define TK_TIPO_STRING 270
+#define TK_EQUAL 271
+#define TK_GTE 272
+#define TK_LTE 273
+#define TK_NEQUAL 274
+#define TK_AND 275
+#define TK_OR 276
+#define TK_NOT 277
+#define TK_IF 278
+#define TK_ELSE 279
+#define TK_DO 280
+#define TK_WHILE 281
+#define TK_FOR 282
+#define TK_BREAK 283
+#define TK_CONTINUE 284
+#define TK_PRINT 285
+#define TK_READ 286
+#define TK_FIM 287
+#define TK_ERROR 288
 
 
 

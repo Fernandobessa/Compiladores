@@ -1,4 +1,7 @@
 int main()
 {
-	int a = not 5;
+	while(1)
+	{
+	int a =7;
+	}
 }
