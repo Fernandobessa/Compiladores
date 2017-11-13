@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include "variaveis.h"
+#include "loop.h"
 
 #define YYSTYPE atributos
 
@@ -26,6 +27,9 @@ string else_if_string = "";
 
 maps* tack = criarMaps();
 varsDeclaradas varsDec;
+
+Loop_stack* loop_tack = criarLoopStack();
+
 
 // Functions
 int yylex(void);
@@ -64,7 +68,7 @@ string geradorTextGoto(int);
 
 S 			: TK_TIPO_INT TK_MAIN '(' ')' BLOCO
 			{
-				cout << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\n" << exibirVarsDeclaradas()  << "\nint main(void)\n{\n" << else_if_string << $5.traducao << "\treturn 0;\n}" << endl; 
+				cout << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\n" << exibirVarsDeclaradas()  << "\nint main(void)\n{\n" << else_if_string << $5.traducao << "\n\treturn 0;\n}" << endl; 
 			}
 			;
 
@@ -170,9 +174,9 @@ COMANDO 	: TK_IF '(' E ')' BLOCO
 				
 
 			}
-			| LOOP
+			| PUSH_LOOP LOOP POP_LOOP
 			{
-				$$.traducao = $1.traducao;
+				$$.traducao = $2.traducao;
 			}
 			| DECLARATION ';'
 			{
@@ -200,7 +204,13 @@ COMANDO 	: TK_IF '(' E ')' BLOCO
 			}
 			| TK_CONTINUE ';'
 			{
-				$$.traducao = "\tcontinue;\n";
+				if(loop_tack->loops.empty()){
+			 		cout << "rrro compilação. continue deve estar em um loop ";
+			 		exit(0);
+			 	}else{
+			 		Loop loopAtual = getLoop(loop_tack);
+			 		$$.traducao = "\tgoto " + loopAtual.contL + ";\n";
+			 	}
 
 			}
 
@@ -312,13 +322,21 @@ DO 			: TK_DO BLOCO TK_WHILE '(' E ')' ';'
 					exit(0);
 				}
 
-				// string nome = geradoraDeNomeDeVariaveis();
-
 				else_if_string += $5.traducao;
-
-				$$.traducao = "\tdo{\n" +$2.traducao+ "\t}\n\twhile(" +$5.label+ ")\n";
-				// $$.traducao = "\tdo{\n" +$2.traducao+ "\t}\n\twhile(" +$5.label+ ");\n";
-				// $$.traducao = "\twhile(" +$5.label+ "){\n" +$5.traducao+ "\t}\n";
+				
+				Loop loop = getLoop(loop_tack);
+				
+				string comecoL = loop.comecoL;
+				string fimL = loop.fimL;
+				string contL = loop.contL;
+	
+				string linha = "\tif(" + $5.label + ")";
+				string showLabel = "{goto "+ comecoL;
+				
+				$$.traducao  = "\t" + comecoL + ":\n" + $2.traducao + "\n\t" + contL + ":\n";
+				// $$.traducao += $5.traducao; 
+				$$.traducao += linha + " " + showLabel + "};\n\t" + fimL + ":\n"; 
+				
 			}
 			;
 WHILE 		: TK_WHILE '(' E ')' BLOCO
@@ -332,25 +350,21 @@ WHILE 		: TK_WHILE '(' E ')' BLOCO
 				}
 				string nome = geradoraDeNomeDeVariaveis();
 				variavel v = criadorDeVariavel(nome, nome, getTipoString(tipo_atual), $3.tamanho);
-				string gotoText_final_if = geradorTextGoto(TK_IF); //$1.tipo
+				
+				Loop loop = getLoop(loop_tack);
+				
+				string comecoL = loop.comecoL;
+				string fimL = loop.fimL;
+				string contL = loop.contL;
+	
+				string voltarProComecoL = "\tgoto "+ comecoL + ";\n\n";
 
-				string line = $3.traducao; 
-				line += "\t" +nome+ " = !" +$3.label+ ";\n";
-
-				$$.traducao = line + "\tif(" +nome+ ") goto " +gotoText_final_if+ ";\n";
-				$$.traducao += $5.traducao+ "\n";
-				$$.traducao += "\t" +gotoText_final_if+ ":\n";
-
-
-				$$.label = gotoText_final_if;
-
-
-				// else_if_string += $3.traducao;
-
-				// $$.traducao = "\twhile(" +$3.label+ "){\n" +$5.traducao+ "\t}\n";
-
-
-
+			    $$.traducao = $3.traducao;
+			    $$.traducao += "\t" + nome + " = !" + $3.label + ";\n";
+			    $$.traducao += "\t" + comecoL +":"+ "\n\tif(" + nome + ") {goto " + fimL +"};";
+			    $$.traducao += "\n" + $5.traducao + "\n";
+			    $$.traducao += "\t" + contL + ":\n" + voltarProComecoL;
+			    $$.traducao += "\t"  + fimL + ":\n\n";
 
 
 			}
@@ -375,6 +389,33 @@ FOR 		: TK_FOR '(' DECLARATION ';' E ';' ATRIB ')' BLOCO
 
 
 
+			}
+			;
+PUSH_LOOP: {
+				// mudar de tk_while pra loop, ou mudar na func pra ser so loop? [to-do]
+				string label = geradorTextGoto(TK_WHILE);
+
+				string comecoL = "inicio_" + label;
+				string fimL = "fim_" + label;
+				string contL = "continue_" + label;
+				
+				Loop loop;
+				loop.fimL = fimL;
+				loop.comecoL = comecoL;
+				loop.contL = contL;
+				
+				
+				pushLoop(loop, loop_tack);
+				
+				$$.traducao = "";
+				$$.label = "";
+			}
+			;
+POP_LOOP:	{
+				popLoop(loop_tack);
+
+				$$.traducao = "";
+				$$.label = "";
 			}
 			;
 PRINT 		: TK_PRINT PRINT_THINGS
@@ -1290,6 +1331,10 @@ string geradorTextGoto(int token){
 	else if (token == TK_FOR)
 	{
 		return "token_for_" +to_string(num_label++);
+	}
+	else if (token == TK_WHILE)
+	{
+		return "token_while_" +to_string(num_label++);
 	}
 
 	return "ISSo nao deveria estar retornando 1 ";
