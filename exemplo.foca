@@ -1,28 +1,17 @@
-int f;
+int g;
 
-int ar(int d, int f, int h){
-	int z;
-}
-
-int are(int d){
-	int q;
+int ar(int v){
+	
 }
 
 int main()
 {	
 
-	f = 8;
-
 	int e;
-	int t;
-	int aa;
 
 	int w;
 
-	w = ar(e, t, aa);
-
-	ar(e, t, aa);
-
+	w = ar(e);
 
 }
 

@@ -90,9 +90,9 @@ const vector<string> explode(const string& s, const char& c);
 
 %%
 
-S 			: DECLARATION ';' FUNCAO_DECLARADA TK_TIPO_INT TK_MAIN '(' ')' BLOCO 
+S 			: DECLARATION_GLOBAL FUNCAO_DECLARADA TK_TIPO_INT TK_MAIN '(' ')' BLOCO 
 			{
-				cout << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\n" << exibirVarsDeclaradas() << "\n" << funcao_declaracoes << "\n" << "\nint main(void)\n{\n" << else_if_string << $8.traducao << "\n\treturn 0;\n}" << endl; 
+				cout << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\n" << exibirVarsDeclaradas() << "\n" << funcao_declaracoes << "\n" << "\nint main(void)\n{\n" << else_if_string << $7.traducao << "\n\treturn 0;\n}" << endl; 
 			}
 			;
 
@@ -857,38 +857,35 @@ POP_LOOP:	{
 			;
 PRINT 		: TK_PRINT PRINT_THINGS
 			{
-
-				$$.traducao = "\tstd::cout << " +$2.traducao+ "std::endl;\n";
-
-				// cout << "DSADSADSA<" << endl;
-
+				$$.traducao = $2.traducao + "\tstd::cout << " +$2.label+ "std::endl;\n";
 			}
 			;
 PRINT_THINGS: PRINT_THINGS ',' PRINT_THING
 			{
 				$$.traducao = $1.traducao + $3.traducao;
+				$$.label = $1.label + $3.label ;
+
 			}
 			| PRINT_THING
 			{
 				$$.traducao = $1.traducao;
+				$$.label = $1.label;
+
 			}
 			;
 PRINT_THING: E
 			{
-				else_if_string += $1.traducao;
+				// else_if_string += $1.traducao;
+				$$.traducao = $1.traducao;
 				// deletadorDeVariavel($1.label);
-				$$.traducao = $1.label + " << ";
+				$$.label = $1.label + " << ";
 
 			}
 			;
 
 READ 		: TK_READ READ_THINGS
 			{
-
 				$$.traducao = "\tstd::cin " +$2.traducao+ ";\n";
-
-				// cout << "DSADSADSA<" << endl;
-
 			}
 			;
 READ_THINGS: READ_THINGS ',' READ_THING
@@ -910,6 +907,15 @@ READ_THING: TK_ID
 			;
 
 
+DECLARATION_GLOBAL: DECLARATION ';'
+			{
+				$$.traducao = $1.traducao;
+			}
+			| // vazio
+			{
+				$$.traducao = "";
+			}
+
 DECLARATION	: TIPO VARLIST
 			{
 				$2.tipo = $1.tipo;
@@ -922,10 +928,7 @@ DECLARATION	: TIPO VARLIST
 				// cout << "AQUIII ________ \n" << "Label: " << $$.label << "\nTrad: " << $$.traducao << "\n ACABOUU ---" <<endl; 
 
 			}
-			| // vazio
-			{
-				$$.traducao = "";
-			}
+			
 			;
 
 TIPO 		: TK_TIPO_INT
