@@ -34,6 +34,10 @@ STRING	\"[^\"]*\"
 
 "string"	{return TK_TIPO_STRING;}
 
+"void"	{return TK_TIPO_VOID;}
+
+"global"	{return TK_GLOBAL;}
+
 [(){}[\];,]	{ return *yytext; }
 
 [+\-*/=]		{ return *yytext; }

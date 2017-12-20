@@ -19,11 +19,29 @@ struct atributos
 	int tamanho;
 };
 
+struct Funcoes
+{
+	string name;
+	string new_name;
+
+	string tipo;
+
+	int qtd_params;
+
+};
+
+vector<Funcoes> funcoes_lista;
+
+// Funcoes *funcoes_lista;
+
 // Variaveis Planistas
 string error_msg = "Wubba Lubba Dub Dub";
 
 // roubando pra fazer else if, gambiarra demais
 string else_if_string = "";
+
+// roubando para fazer declaracao de funcao gambiarra demais
+string funcao_declaracoes = "";
 
 maps* tack = criarMaps();
 varsDeclaradas varsDec;
@@ -47,16 +65,22 @@ int tipoResult(int, int);
 atributos tratadoraArith(atributos, atributos, string);
 variavel getVarPorNome(string);
 string geradorTextGoto(int);
+
+
+const vector<string> explode(const string& s, const char& c);
 %}
 
 %token TK_NUM TK_REAL TK_CHAR TK_BOOL TK_STRING
-%token TK_MAIN TK_ID TK_TIPO_VAR TK_TIPO_INT TK_TIPO_FLOAT TK_TIPO_CHAR TK_TIPO_BOOL TK_TIPO_STRING
+%token TK_MAIN TK_ID TK_TIPO_VAR TK_TIPO_INT TK_TIPO_FLOAT TK_TIPO_CHAR TK_TIPO_BOOL TK_TIPO_STRING TK_TIPO_VOID
 %token TK_EQUAL TK_GTE TK_LTE TK_NEQUAL
 %token TK_AND TK_OR TK_NOT
 %token TK_IF TK_ELSE
 %token TK_DO TK_WHILE TK_FOR TK_BREAK TK_CONTINUE
 %token TK_PRINT TK_READ
 %token TK_FIM TK_ERROR
+%token TK_MM TK_PP
+%token TK_GLOBAL
+
 
 // ordem das operacoes?! bottom -> up	
 %start S
@@ -66,9 +90,9 @@ string geradorTextGoto(int);
 
 %%
 
-S 			: TK_TIPO_INT TK_MAIN '(' ')' BLOCO
+S 			: DECLARATION ';' FUNCAO_DECLARADA TK_TIPO_INT TK_MAIN '(' ')' BLOCO 
 			{
-				cout << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\n" << exibirVarsDeclaradas()  << "\nint main(void)\n{\n" << else_if_string << $5.traducao << "\n\treturn 0;\n}" << endl; 
+				cout << "/*Compilador FOCA*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\n" << exibirVarsDeclaradas() << "\n" << funcao_declaracoes << "\n" << "\nint main(void)\n{\n" << else_if_string << $8.traducao << "\n\treturn 0;\n}" << endl; 
 			}
 			;
 
@@ -200,12 +224,18 @@ COMANDO 	: TK_IF '(' E ')' BLOCO
 			}
 			| TK_BREAK ';'
 			{
-				$$.traducao = "\tbreak;\n";
+				if(loop_tack->loops.empty()){
+			 		cout << "erro compilação. break deve estar em um loop ";
+			 		exit(0);
+			 	}else{
+			 		Loop loopAtual = getLoop(loop_tack);
+			 		$$.traducao = "\tgoto " + loopAtual.fimL + ";\n";
+			 	}
 			}
 			| TK_CONTINUE ';'
 			{
 				if(loop_tack->loops.empty()){
-			 		cout << "rrro compilação. continue deve estar em um loop ";
+			 		cout << "erro compilação. continue deve estar em um loop ";
 			 		exit(0);
 			 	}else{
 			 		Loop loopAtual = getLoop(loop_tack);
@@ -213,8 +243,407 @@ COMANDO 	: TK_IF '(' E ')' BLOCO
 			 	}
 
 			}
+			| OPERADOR_UNARIO ';'
+			{
+				$$ = $1;
+			}
+
+			| GLOBAL ';'
+			{
+				$$ = $1;
+			}
+
+			| FUNCAO_CHAMADA ';'
+			{
+				$$ = $1;
+			}
 
 			// | E ';'
+			;
+
+OPERADOR_UNARIO:TK_ID TK_PP 
+			{
+				
+				variavel v = getVarPorNome($1.label);
+				if(v.tipo != getTipoString(TK_TIPO_INT)){
+					cout << "operador ++ não é permitido para o tipo " << v.tipo << endl;
+					exit(0);
+				}
+				
+				string nome = geradoraDeNomeDeVariaveis();
+				variavel var = criadorDeVariavel(nome, nome, v.tipo, 0);
+				
+				string linha = "\t" + nome + " =  1;\n";
+				string linha2 = "\t" + var.temp_name + " = "+ nome +" + " + v.temp_name + ";\n";
+				
+				$$.traducao = linha + linha2;
+
+
+			}
+			| TK_PP TK_ID 
+			{
+				variavel v = getVarPorNome($1.label);
+				if(v.tipo != getTipoString(TK_TIPO_INT)){
+					cout << "operador ++ não é permitido para o tipo " << v.tipo << endl;
+					exit(0);
+				}
+				
+				addVarEsc(tack, v);
+				varsDec.push_back(v);
+				
+				string linha2 = "\t" + v.temp_name + " = " + v.temp_name + " + "+ "1" + ";\n";
+				
+				$$.traducao = linha2;
+			}
+			| TK_ID TK_MM
+			{
+				
+				variavel v = getVarPorNome($1.label);
+				if(v.tipo != getTipoString(TK_TIPO_INT)){
+					cout << "operador -- não é permitido para o tipo " << v.tipo << endl;
+					exit(0);
+				}
+				
+				string nome = geradoraDeNomeDeVariaveis();
+				variavel var = criadorDeVariavel(nome, nome, v.tipo, 0);
+				
+				string linha = "\t" + nome + " =  1;\n";
+				string linha2 = "\t" + var.temp_name + " = " + v.temp_name + " - " + nome + ";\n";
+				
+				$$.traducao = linha + linha2;
+
+
+			}
+			| TK_MM TK_ID
+			{
+				
+				variavel v = getVarPorNome($1.label);
+				if(v.tipo != getTipoString(TK_TIPO_INT)){
+					cout << "operador -- não é permitido para o tipo " << v.tipo << endl;
+					exit(0);
+				}
+				
+				addVarEsc(tack, v);
+				varsDec.push_back(v);
+
+				
+				//string linha = "\t" + nome + " =  1;\n";
+				string linha2 = "\t" + v.temp_name + " = " + v.temp_name + " - " + "1" + ";\n";
+				
+				$$.traducao = linha2;
+			}
+			;
+GLOBAL: 	TK_GLOBAL TIPO TK_ID 
+			{
+			
+
+				//nao existe no escopo global
+				if ( tack->variaveis_map[0][$3.label].var_name == ""  ){
+					
+					string nome = geradoraDeNomeDeVariaveis();
+
+					variavel v;
+					if (getTipoString($2.tipo) == "string")
+					{
+						// criando sting com tamanho predeterminado, deve melhorar [to-do]
+						v = criarVar(nome, nome, getTipoString($2.tipo), 10);
+						
+					}else{
+						v = criarVar(nome, nome, getTipoString($2.tipo), 0);
+					}
+
+					addVarEscGlobal(tack, v);
+					varsDec.push_back(v);
+
+				}else{
+					cout << "Variavel " << $3.label << " ja foi declarada no escopo global" <<endl;
+					exit(0);
+				}
+	
+			}
+			|
+			TK_GLOBAL TIPO TK_ID '=' E
+			{
+			
+				//nao existe no escopo global
+				if ( tack->variaveis_map[0][$3.label].var_name == ""  ){
+
+					string nome = geradoraDeNomeDeVariaveis();
+
+					variavel v;
+					if (getTipoString($2.tipo) == "string")
+					{
+						// criando sting com tamanho predeterminado, deve melhorar [to-do]
+						v = criarVar(nome, nome, getTipoString($2.tipo), 10);
+						
+					}else{
+						v = criarVar(nome, nome, getTipoString($2.tipo), 0);
+					}
+
+					addVarEscGlobal(tack, v);
+					varsDec.push_back(v);
+					
+					// Cast na atribuição
+					if( v.tipo != getTipoString($5.tipo) ) {
+						string store = geradoraDeNomeDeVariaveis();
+						string linha =  store + " = (" +v.tipo+") " + $5.label + ";\n";
+						string linha2 = "\t"  + nome + " = " + store + ";\n";
+						
+						$$.traducao = $3.traducao + $5.traducao + "\t"  + linha + linha2;
+	
+						variavel v;
+						if (getTipoString($2.tipo) == "string")
+						{
+							// criando sting com tamanho predeterminado, deve melhorar [to-do]
+							v = criarVar(nome, nome, getTipoString($2.tipo), 10);
+							
+						}else{
+							v = criarVar(nome, nome, getTipoString($2.tipo), 0);
+						}
+
+						addVarEscGlobal(tack, v);
+						varsDec.push_back(v);
+				
+					}
+					else
+					{
+						// tipo igual, inferido?
+
+						if (getTipoString($5.tipo) == "char*"){
+							$$.traducao = $3.traducao + $5.traducao + "\tstrcpy(" + nome  + ", " + $5.label +");\n";
+						}
+						else
+							$$.traducao = $3.traducao + $5.traducao + "\t" + nome  + " = " + $5.label +";\n";
+						
+					}
+				
+				}	
+			}
+			;
+FUNCAO_CHAMADA: TK_ID '(' PARAMS_FUNCAO_CHAMADA ')'
+			{
+				cout << "ASDSAD " << $1.label << " " << $3.tamanho << endl;
+
+				
+
+				for (int i = 0; i < funcoes_lista.size(); ++i)
+				{
+					// checar se ja existe uma funcao com mesmo nome
+					if (funcoes_lista.at(i).name == $1.label && funcoes_lista.at(i).qtd_params != $3.tamanho)
+					{
+						cout << "Funcao com o mesmo nome mas nao com esse numero de parametros -> " << funcoes_lista.at(i).name << endl;
+						exit(0);
+					}
+					else if (funcoes_lista.at(i).name == $1.label && funcoes_lista.at(i).qtd_params == $3.tamanho)
+					{
+						// string params = $3.traducao;
+						// string call = "\tcall " + $1.label + ", " + to_string($3.tamanho); 
+
+
+						// VOLTAR AQUI
+						string var_parametros = "";
+						cout << "nome das variaveis buscada " << $3.traducao << endl;
+						string tradu = $3.traducao;
+						vector<string> nome_vars = explode(tradu, ',');
+						for (int j = 0; j < $3.tamanho; ++j)
+						{
+
+							cout << "nome da variavel buscada " << nome_vars.at(j) << endl;
+							variavel var = getVarPorNome(nome_vars.at(j));
+
+							// variavel nao existe
+							if (var.var_name == "")
+							{
+								cout << "essa variavel nao existe " << endl;
+								exit(0);
+							}
+
+							var_parametros += var.temp_name;
+
+							if (j < $3.tamanho - 1)
+							{
+								var_parametros += ", ";
+							}
+
+						}
+
+
+						$$.traducao = "\t" + $1.label + "(" + var_parametros + ");\n";
+
+						cout << $$.traducao << endl;
+					}
+
+					cout << "nome da funcao: " << funcoes_lista.at(i).name << " parametros " << $3.traducao << endl;
+				}	
+
+			}
+			| TK_ID '=' TK_ID '(' PARAMS_FUNCAO_CHAMADA ')'
+			{
+				cout << "ASDSAD " << $3.label << " " << $5.tamanho << endl;
+
+				
+
+				for (int i = 0; i < funcoes_lista.size(); ++i)
+				{
+					// checar se ja existe uma funcao com mesmo nome
+					if (funcoes_lista.at(i).name == $3.label && funcoes_lista.at(i).qtd_params != $5.tamanho)
+					{
+						cout << "Funcao com o mesmo nome mas nao com esse numero de parametros -> " << funcoes_lista.at(i).name << endl;
+						exit(0);
+					}
+					else if (funcoes_lista.at(i).name == $3.label && funcoes_lista.at(i).qtd_params == $5.tamanho)
+					{
+						// string params = $3.traducao;
+						// string call = "\tcall " + $1.label + ", " + to_string($3.tamanho); 
+
+
+						// VOLTAR AQUI
+						string var_parametros = "";
+						cout << "nome das variaveis buscada " << $5.traducao << endl;
+						string tradu = $5.traducao;
+						vector<string> nome_vars = explode(tradu, ',');
+						for (int j = 0; j < $5.tamanho; ++j)
+						{
+
+							cout << "nome da variavel buscada " << nome_vars.at(j) << endl;
+							variavel var = getVarPorNome(nome_vars.at(j));
+
+							// variavel nao existe
+							if (var.var_name == "")
+							{
+								cout << "essa variavel nao existe " << endl;
+								exit(0);
+							}
+
+							var_parametros += var.temp_name;
+
+							if (j < $5.tamanho - 1)
+							{
+								var_parametros += ", ";
+							}
+
+						}
+
+						variavel v = getVarPorNome($1.label);
+
+						if (v.var_name == "")
+						{
+							cout << "Nao existe variavel que a funcao vai ser atribuida" << endl;
+							exit(0);
+						}
+						else if(v.tipo != funcoes_lista.at(i).tipo){
+							cout << "Tipo de variavel que a funcao vai ser atribuida diferente do tipo da cuncao" << endl;
+							cout << v.tipo << " " << funcoes_lista.at(i).tipo << endl;
+							exit(0);
+						}
+						else{
+							$$.traducao = "\t" + v.temp_name + " = " + $3.label + "(" + var_parametros + ");\n";
+
+						}
+
+
+
+						cout << $$.traducao << endl;
+					}
+
+					cout << "nome da funcao: " << funcoes_lista.at(i).name << " parametros " << $5.traducao << endl;
+				}	
+
+			}
+			;
+
+PARAMS_FUNCAO_CHAMADA: TK_ID
+			{
+				$$.traducao = $1.label;
+				$$.tamanho = 1;
+				$$.tipo = $1.tipo;
+
+			}
+			| TK_ID ',' PARAMS_FUNCAO_CHAMADA
+			{
+				$$.traducao = $1.label + "," + $3.traducao;
+				$$.tamanho = $3.tamanho + 1;
+			}
+			| FUNCAO_CHAMADA
+			{
+				$$.traducao = $1.traducao;
+			}
+			;
+
+FUNCAO_DECLARADA: TIPO TK_ID '(' PARAMS_FUNCAO ')' BLOCO
+			{
+				cout << "Declrando func " << $2.label << endl;
+
+				for (int i = 0; i < funcoes_lista.size(); ++i)
+				{
+					// checar se ja existe uma funcoes_lista com mesmo nome
+					if (funcoes_lista.at(i).name == $2.label && funcoes_lista.at(i).qtd_params == $4.tamanho)
+					{
+						cout << "Funcao com o mesmo nome e tamanho de parametros ja declarada -> " << funcoes_lista.at(i).name << endl;
+						exit(0);
+					}
+				}
+
+				Funcoes funcao = {.name = $2.label, .qtd_params = $4.tamanho, .tipo = getTipoString($1.tipo)};
+				funcoes_lista.push_back(funcao);
+
+				// funcoes_lista = (Funcoes*) malloc(sizeof(struct Funcoes));
+				// funcoes_lista.at(i).name = $2.label;
+				// funcoes_lista.at(i).qtd_params = $4.tamanho;
+
+				cout << "QTD PARAMS_1 " << funcao.qtd_params << " " << endl;
+
+
+				// funcoes_lista.at(i).new_name por questao de debug :)
+				funcao_declaracoes += getTipoString($1.tipo) + " " + funcao.name + "(" + $4.traducao + ") {\n" + $6.traducao + "\n}";
+			}
+			| FUNCAO_DECLARADA TIPO TK_ID '(' PARAMS_FUNCAO ')' BLOCO
+			{
+
+				cout << "Declrando func " << $3.label << endl;
+
+				for (int i = 0; i < funcoes_lista.size(); ++i)
+				{
+					// checar se ja existe uma funcoes_lista com mesmo nome
+					if (funcoes_lista.at(i).name == $3.label && funcoes_lista.at(i).qtd_params == $5.tamanho)
+					{
+						cout << "Funcao com o mesmo nome e tamanho de parametros ja declarada -> " << funcoes_lista.at(i).name << endl;
+						exit(0);
+					}
+				}
+
+				Funcoes funcao = {.name = $3.label, .qtd_params = $5.tamanho, .tipo = getTipoString($1.tipo)};
+				funcoes_lista.push_back(funcao);
+
+				cout << "QTD PARAMS_2 " << funcao.qtd_params << " " << endl;
+
+				// funcoes_lista.at(i).new_name por questao de debug :)
+				funcao_declaracoes += "\n" + getTipoString($2.tipo) + " " + funcao.name + "(" + $5.traducao + ") {\n" + $7.traducao + "\n}";
+				
+
+			}
+			| // vazio
+			{
+				$$.traducao = "";
+			}
+			;
+PARAMS_FUNCAO: TIPO TK_ID
+			{
+				$$.traducao = getTipoString($1.tipo) + " " + $2.label;
+				$$.tamanho = 1;
+				// cout << "TAAAMNHOooooooo " << $$.tamanho << endl;
+
+
+			}
+			| TIPO TK_ID ',' PARAMS_FUNCAO
+			{
+				$$.traducao = getTipoString($1.tipo) + " " + $2.label + "," + $4.traducao;
+				$$.tamanho = $4.tamanho + 1;
+
+				// cout << "TAAAMNHO " << $$.tamanho << " " << $4.tamanho << endl;
+
+			}
+
 			;
 ELSE 		: TK_ELSE BLOCO
 			{
@@ -369,26 +798,34 @@ WHILE 		: TK_WHILE '(' E ')' BLOCO
 
 			}
 			;
-FOR 		: TK_FOR '(' DECLARATION ';' E ';' ATRIB ')' BLOCO
+FOR 		: TK_FOR '(' DECLARATION ';' E ';' OPERADOR_UNARIO ')' BLOCO
 			{
-
-				int tipo_atual = tipoResult($3.tipo, $3.tipo);
-
-				if (tipo_atual != TK_TIPO_INT)
-				{
-					cout << "nao aceita esse tipo no for" << endl;
+				
+				if( $5.tipo != TK_TIPO_BOOL ){
+					cout <<  "COMPILACAO com erro: FOR espera um bool no segundo parametro" <<endl;
 					exit(0);
 				}
 
-				else_if_string += $3.traducao;
 
-				$$.traducao = "\tfor(" +$3.label+ " ; " +$5.label+ ";" +$7.label+ "){\n" +$9.traducao+ "\t}\n";
+				string nome = geradoraDeNomeDeVariaveis();
+				variavel v = criadorDeVariavel(nome, nome, getTipoString($5.tipo), 0);
+					
+					
+				Loop loop = getLoop(loop_tack);
 
-
-				cout << $3.label <<endl;
-
-
-
+				string comecoL = loop.comecoL;
+				string fimL = loop.fimL;
+				string contL = loop.contL;
+				
+				string linha = "\t" + nome + " = !" + $5.label + ";\n";
+				
+				string atrib_inicial = $3.traducao;
+				string showLabel = "\n\t" + comecoL + ": \n" + $5.traducao + linha + "\n";
+				string verifica = "\tif(" + nome + ") " + "\tgoto "+ fimL + ";\n";
+				
+				string dentroFor = $9.traducao + "\n\t" + contL + ": \n" + $7.traducao + $5.traducao + linha + "\n";
+				
+				$$.traducao = atrib_inicial + showLabel + verifica + dentroFor + "\tgoto " + comecoL + ";\n\t" + fimL + ":\n";
 			}
 			;
 PUSH_LOOP: {
@@ -485,37 +922,45 @@ DECLARATION	: TIPO VARLIST
 				// cout << "AQUIII ________ \n" << "Label: " << $$.label << "\nTrad: " << $$.traducao << "\n ACABOUU ---" <<endl; 
 
 			}
+			| // vazio
+			{
+				$$.traducao = "";
+			}
 			;
 
 TIPO 		: TK_TIPO_INT
 			{
 				$$.tipo = TK_TIPO_INT;
-				$$.traducao = $1.traducao;
+				// $$.traducao = "int";
 			}
 			| TK_TIPO_FLOAT
 			{
 				$$.tipo = TK_TIPO_FLOAT;
-				$$.traducao = $1.traducao;
+				// $$.traducao = "float";
 			}
 			| TK_TIPO_CHAR
 			{
 				$$.tipo = TK_TIPO_CHAR;
-				$$.traducao = $1.traducao;
+				// $$.traducao = "char";
 			}
 			| TK_TIPO_BOOL
 			{
 				$$.tipo = TK_TIPO_BOOL;
-				$$.traducao = $1.traducao;
+				// $$.traducao = "bool";
 			}
 			| TK_TIPO_STRING
 			{
 				$$.tipo = TK_TIPO_STRING;
-				$$.traducao = $1.traducao;
+				// $$.traducao = "string";
 			}
 			// isso seria pra declarar variavel sem o tipo antes do nome da mesma [to-do], rever isso
 			| TK_TIPO_VAR
 			{
-				$$.traducao = $1.traducao;
+				// $$.traducao = "var";
+			}
+			| TK_TIPO_VOID
+			{
+				// $$.traducao = "void";;
 			}
 			;
 
@@ -1064,6 +1509,15 @@ string geradoraDeNomeDeVariaveis(){
 	return "temp_" + to_string(num_para_gerar_nomes++);
 }
 
+string geradoraDeNomeDeFuncoes(){
+	static int num_para_gerar_nomes = 0;
+	// string nome;
+	// nome = "temp_" + to_string(num_para_gerar_nomes);
+
+	// num_para_gerar_nomes++;
+	return "func_temp_" + to_string(num_para_gerar_nomes++);
+}
+
 int getTipoToken(string tipo){
 
 	if (tipo == "int")
@@ -1288,6 +1742,10 @@ atributos concatenarStrings(atributos a1, atributos a2){
 
 variavel getVarPorNome(string name){
 
+	// DECLARADAS
+	cout << "DECLARADAS" << endl;
+	cout << exibirVarsDeclaradas() << endl;
+
 	// quando for blocos devo procurar no vetor
 
 	Var_table vt = tack->variaveis_map[tack->escopo_num];
@@ -1295,7 +1753,7 @@ variavel getVarPorNome(string name){
 	// variavel ja declarada
 	if ( vt.count(name) )
 	{
-		// cout << "achou " << name <<endl;
+		cout << "achou " << name <<endl;
 		return vt[name];
 	}
 	else {
@@ -1307,7 +1765,7 @@ variavel getVarPorNome(string name){
 
 			if ( vt.count(name) )
 			{
-				// cout << "achou " << name <<endl;
+				cout << "achou " << name <<endl;
 
 				return vt[name];
 			}
@@ -1317,7 +1775,7 @@ variavel getVarPorNome(string name){
 	// return criarVar("", "", "",  0);
 	// return tack->variaveis_map[tack->escopo_num][name];
 
-	cout << "Essa variavel nao 'existe'" << endl;
+	cout << "Essa variavel nao 'existe' : " << name << endl;
 	return vt[0];
 }
 
@@ -1338,6 +1796,24 @@ string geradorTextGoto(int token){
 	}
 
 	return "ISSo nao deveria estar retornando 1 ";
+}
+
+
+
+const vector<string> explode(const string& s, const char& c)
+{
+	string buff = "";
+	vector<string> v;
+
+	for (int n = 0; n < s.size(); ++n)
+	{
+		if(s.at(n) != c) buff+=s.at(n); else
+		if(s.at(n) == c && buff != "") { v.push_back(buff); buff = ""; }
+	}
+	
+	if(buff != "") v.push_back(buff);
+	
+	return v;
 }
 
 

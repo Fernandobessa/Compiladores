@@ -52,24 +52,28 @@
      TK_TIPO_CHAR = 268,
      TK_TIPO_BOOL = 269,
      TK_TIPO_STRING = 270,
-     TK_EQUAL = 271,
-     TK_GTE = 272,
-     TK_LTE = 273,
-     TK_NEQUAL = 274,
-     TK_AND = 275,
-     TK_OR = 276,
-     TK_NOT = 277,
-     TK_IF = 278,
-     TK_ELSE = 279,
-     TK_DO = 280,
-     TK_WHILE = 281,
-     TK_FOR = 282,
-     TK_BREAK = 283,
-     TK_CONTINUE = 284,
-     TK_PRINT = 285,
-     TK_READ = 286,
-     TK_FIM = 287,
-     TK_ERROR = 288
+     TK_TIPO_VOID = 271,
+     TK_EQUAL = 272,
+     TK_GTE = 273,
+     TK_LTE = 274,
+     TK_NEQUAL = 275,
+     TK_AND = 276,
+     TK_OR = 277,
+     TK_NOT = 278,
+     TK_IF = 279,
+     TK_ELSE = 280,
+     TK_DO = 281,
+     TK_WHILE = 282,
+     TK_FOR = 283,
+     TK_BREAK = 284,
+     TK_CONTINUE = 285,
+     TK_PRINT = 286,
+     TK_READ = 287,
+     TK_FIM = 288,
+     TK_ERROR = 289,
+     TK_MM = 290,
+     TK_PP = 291,
+     TK_GLOBAL = 292
    };
 #endif
 /* Tokens.  */
@@ -86,24 +90,28 @@
 #define TK_TIPO_CHAR 268
 #define TK_TIPO_BOOL 269
 #define TK_TIPO_STRING 270
-#define TK_EQUAL 271
-#define TK_GTE 272
-#define TK_LTE 273
-#define TK_NEQUAL 274
-#define TK_AND 275
-#define TK_OR 276
-#define TK_NOT 277
-#define TK_IF 278
-#define TK_ELSE 279
-#define TK_DO 280
-#define TK_WHILE 281
-#define TK_FOR 282
-#define TK_BREAK 283
-#define TK_CONTINUE 284
-#define TK_PRINT 285
-#define TK_READ 286
-#define TK_FIM 287
-#define TK_ERROR 288
+#define TK_TIPO_VOID 271
+#define TK_EQUAL 272
+#define TK_GTE 273
+#define TK_LTE 274
+#define TK_NEQUAL 275
+#define TK_AND 276
+#define TK_OR 277
+#define TK_NOT 278
+#define TK_IF 279
+#define TK_ELSE 280
+#define TK_DO 281
+#define TK_WHILE 282
+#define TK_FOR 283
+#define TK_BREAK 284
+#define TK_CONTINUE 285
+#define TK_PRINT 286
+#define TK_READ 287
+#define TK_FIM 288
+#define TK_ERROR 289
+#define TK_MM 290
+#define TK_PP 291
+#define TK_GLOBAL 292
 
 
 

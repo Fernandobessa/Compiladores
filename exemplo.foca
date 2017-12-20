@@ -1,8 +1,28 @@
-int main()
-{
-	while(1)
-	{
-	int a = 9;
-	continue;
-	}
+int f;
+
+int ar(int d, int f, int h){
+	int z;
 }
+
+int are(int d){
+	int q;
+}
+
+int main()
+{	
+
+	f = 8;
+
+	int e;
+	int t;
+	int aa;
+
+	int w;
+
+	w = ar(e, t, aa);
+
+	ar(e, t, aa);
+
+
+}
+
